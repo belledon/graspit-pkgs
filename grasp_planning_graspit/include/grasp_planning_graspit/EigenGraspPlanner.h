@@ -120,7 +120,9 @@ public:
               const int repeatPlanning,// = 1,
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              const PlannerType& planType = SimAnn);
+              const PlannerType& planType = SimAnn,
+              const std::vector<float> *annealParams,
+              const AnnealType t = ANNEAL_DEFAULT);
 
     /**
      * Sets the current hand and object before calling plan(const int, const int).
@@ -157,7 +159,9 @@ public:
               const int repeatPlanning,//   = 1
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              const PlannerType& planType = SimAnn);
+              const PlannerType& planType = SimAnn
+              const std::vector<float> *annealParams,
+              const AnnealType t = ANNEAL_DEFAULT);
 
     /**
      * Saves the results as a GraspIt world files and/or inventor files in the given directory,
