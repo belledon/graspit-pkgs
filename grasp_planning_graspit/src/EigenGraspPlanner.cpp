@@ -263,7 +263,9 @@ bool EigenGraspPlanner::plan(const std::string& handName, const std::string& obj
                              const int repeatPlanning,
                              const int maxResultsPerRepeat,
                              const bool finishWithAutograsp,
-                             const PlannerType& planType)
+                             const PlannerType& planType,
+                             const std::vector<float> *annealParams,
+                             const AnnealType t)
 {
     if (!getGraspItSceneManager()->isInitialized())
     {
@@ -293,7 +295,8 @@ bool EigenGraspPlanner::plan(const std::string& handName, const std::string& obj
     // getGraspItSceneManager()->saveGraspItWorld("/home/jenny/test/worlds/startWorld.xml",true);
     // getGraspItSceneManager()->saveInventorWorld("/home/jenny/test/worlds/startWorld.iv",true);
 
-    return plan(maxPlanningSteps, repeatPlanning, maxResultsPerRepeat, finishWithAutograsp, planType);
+    return plan(maxPlanningSteps, repeatPlanning, maxResultsPerRepeat, finishWithAutograsp, 
+        planType, annealParams, t);
 }
 
 bool compareGraspPlanningStates(const GraspPlanningState* g1, const GraspPlanningState* g2)
@@ -314,7 +317,9 @@ bool EigenGraspPlanner::plan(const int maxPlanningSteps,
                              const int repeatPlanning,
                              const int maxResultsPerRepeat,
                              const bool finishWithAutograsp,
-                             const PlannerType& planType)
+                             const PlannerType& planType,
+                             const std::vector<float> *annealParams,
+                             const AnnealType t)
 {
     if (!getGraspItSceneManager()->isInitialized())
     {
@@ -330,7 +335,7 @@ bool EigenGraspPlanner::plan(const int maxPlanningSteps,
     for (int i = 0; i < repeatPlanning; ++i)
     {
         //PRINTMSG("Initializing planning...");
-        if (!initPlanner(maxPlanningSteps, planType))
+        if (!initPlanner(maxPlanningSteps, planType, annealParams, t))
         {
             PRINTERROR("Could not initialize planner.");
             return false;
@@ -816,7 +821,8 @@ StateType getStateType(const EigenGraspPlanner::GraspItStateType& st)
 
 
 
-bool EigenGraspPlanner::initPlanner(const int maxPlanningSteps, const PlannerType& plannerType)
+bool EigenGraspPlanner::initPlanner(const int maxPlanningSteps, const PlannerType& plannerType, const std::vector<float> *annealParams,
+                             const AnnealType t)
 {
     Hand * mHand = getCurrentHand();
     GraspableBody * mObject = getCurrentGraspableBody();
@@ -869,7 +875,7 @@ bool EigenGraspPlanner::initPlanner(const int maxPlanningSteps, const PlannerTyp
 
     initSearchType(graspPlanningState, graspitStateType);
 
-    initPlannerType(graspPlanningState, plannerType);
+    initPlannerType(graspPlanningState, plannerType, annealParams, t);
 
     setPlanningParameters();
     // steps
@@ -943,7 +949,8 @@ void EigenGraspPlanner::initSearchType(GraspPlanningState& graspPlanningState, c
 
 
 
-void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningState, const PlannerType &pt)
+void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningState, const PlannerType &pt,
+    const std::vector<float> *annealParams, const AnnealType t)
 {
     PRINTMSG("Initializing planner type");
 
@@ -966,6 +973,7 @@ void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningS
     {
         if (graspitEgPlanner) delete graspitEgPlanner;
         SimAnnPlanner * planner = new SimAnnPlanner(mHand);
+        planner->useAnnealingParameters(t, annealParams);
         planner->setModelState(&graspPlanningState);
         graspitEgPlanner = planner;
         break;
