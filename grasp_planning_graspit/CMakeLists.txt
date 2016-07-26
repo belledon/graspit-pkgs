@@ -102,7 +102,7 @@ if (BUILD_GRASPIT)
 
     # set the environment variables for the graspit_external/CMakeLists-external-graspit.txt
     set (GRASPIT_REPO_NAME graspit)
-    set (GRASPIT_GIT "https://github.com/JenniferBuehler/graspit")
+    set (GRASPIT_GIT "https://github.com/belledon/graspit")
     set (GRASPIT_BRANCH_NAME "master")
     set (GRASPIT_DL_DIR ${CMAKE_CURRENT_BINARY_DIR}/graspit_external)
     set (GRASPIT_INSTALL_DIR ${GRASPIT_DL_DIR}/install)
@@ -304,6 +304,7 @@ endif (BUILD_GRASPIT)
 
 ## Declare C++ executables
 add_executable(grasp_planning src/grasp_planning.cpp)
+add_executable(om_grasp_planning om/om_grasp_planning.cpp)
 add_executable(simple_graspit_database test/simple_graspit_database.cpp)
 add_executable(simple_planning_tutorial tutorial/src/simple_planning_tutorial.cpp)
 
@@ -328,6 +329,11 @@ target_link_libraries(grasp_planning_graspit
 target_link_libraries(grasp_planning
   grasp_planning_graspit
   ${DEPEND_LIBRARIES}
+)
+
+target_link_libraries(om_grasp_planning
+    grasp_planning_graspit
+    ${DEPEND_LIBRARIES}
 )
 
 target_link_libraries(simple_planning_tutorial
@@ -377,13 +383,22 @@ install(TARGETS grasp_planning
    RUNTIME DESTINATION ${BIN_DESTINATION}
 )
 
+install(TARGETS om_grasp_planning
+    EXPORT om_grasp_planning-targets
+    ARCHIVE DESTINATION ${BIN_DESTINATION}
+    LIBRARY DESTINATION ${BIN_DESTINATION}
+    RUNTIME DESTINATION ${BIN_DESTINATION}
+)
+
 install(EXPORT grasp_planning_graspit-targets
     DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
 )
 install(EXPORT grasp_planning-targets
     DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
 )
-
+install(EXPORT om_grasp_planning-targets
+    DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
+)
 install(FILES
     cmake/${GRASP_PLANNNIG_GRASPIT_CONFIG_CMAKE}
     DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
