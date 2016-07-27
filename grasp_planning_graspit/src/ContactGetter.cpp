@@ -1,24 +1,39 @@
 //ContactGetter.cpp
 
 #include <grasp_planning_graspit/ContactGetter.h>
+#include <grasp_planning_graspit/LogBinding.h>
+#include <grasp_planning_graspit/PrintHelpers.h>
+#include <grasp_planning_graspit/GraspItHelpers.h>
+
 
 #include <Inventor/Qt/SoQt.h>
+#include <Inventor/actions/SoWriteAction.h>
+#include <Inventor/actions/SoGetBoundingBoxAction.h>
 #include <Inventor/sensors/SoIdleSensor.h>
+#include <boost/filesystem.hpp>
 
-using GraspIt::ContactGetter
+using GraspIt::ContactGetter;
+using GraspIt::Log;
 
-ContactGetter::ContactGetter(const std::string& name, 
-							 const SHARED_PTR<GraspItSceneManager>& interface):
-    GraspItAccessor(name, intr),
+ContactGetter::ContactGetter(const std::string& name, const SHARED_PTR<GraspItSceneManager>& intr):
+    GraspItAccessor(name, intr)
+    // mEnergyCalculator(NULL),
+    // graspitEgPlanner(NULL),
+    // graspitStateType(AxisAngle),
+    // graspitSearchEnergyType(EnergyContact),
+    // useContacts(true),
 #ifdef USE_SEPARATE_SOSENSOR
-    mIdleSensor(NULL),
+    mIdleSensor(NULL)
 #endif
-    {
-   
+    // planCommand(NONE)
+{
+    // mEnergyCalculator=new SearchEnergy();
+    // mEnergyCalculator->setStatStream(&std::cout);
+
     if (!eventThreadRunsQt())
     {
-        PRINTERROR("ContactGetter supports only GraspItSceneManager instances which run Qt.");
-        throw std::string("ContactGetter supports only GraspItSceneManager instances which run Qt.");
+        PRINTERROR("EigenGraspPlanner supports only GraspItSceneManager instances which run Qt.");
+        throw std::string("EigenGraspPlanner supports only GraspItSceneManager instances which run Qt.");
     }
 
     addAsIdleListener();
@@ -57,11 +72,10 @@ void ContactGetter::idleEventFromSceneManager()
     mIdleSensor->schedule();
 #else
     scheduleForIdleEventUpdate();
-    ivIdleCallback();
 #endif
 }
 
-void ContactGetter::OnSceneManagerShutdown()
+void ContactGetter::onSceneManagerShutdown()
 {
 #ifdef USE_SEPARATE_SOSENSOR
     // quit the idle sensor to avoid conflicts when Inventor
