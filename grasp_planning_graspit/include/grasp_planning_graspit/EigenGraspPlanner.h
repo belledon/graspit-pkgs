@@ -26,6 +26,8 @@
 #include <grasp_planning_graspit/EigenGraspResult.h>
 #include <grasp_planning_graspit/GraspItAccessor.h>
 
+#include <EGPlanner/search.h>
+
 #include <vector>
 #include <string>
 
@@ -97,6 +99,9 @@ public:
     // Later this should be: enum PlannerType {SimAnn, Loop, MultiThreaded };
     enum PlannerType {SimAnn};
 
+    // For now, only using either defaults or custom (user input) annealing values
+    // enum AnnealingType{ANNEAL_DEFAULT, ANNEAL_CUSTOM};
+
     /**
      * Creates and initializes the planner. Also registers the class to enable updates
      * from the scene manager thread by calling addAsSchedulable(). If
@@ -116,13 +121,13 @@ public:
      *                       results.
      * \return false if planner could not be initialized or if it failed.
      */
-    bool plan(const int maxPlanningSteps,// = DEFAULT_MAX_PLANNING_STEPS,
+    bool plan(const int maxPlanningSteps,// DEFAULT_MAX_PLANNING_STEPS
               const int repeatPlanning,// = 1,
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              const PlannerType& planType = SimAnn,
-              const std::vector<float> *annealParams,
-              const AnnealType t = ANNEAL_DEFAULT);
+              std::vector<float> *annealParams = {},
+              const AnnealingType t = ANNEAL_DEFAULT,
+              const PlannerType& planType = SimAnn);
 
     /**
      * Sets the current hand and object before calling plan(const int, const int).
@@ -153,15 +158,16 @@ public:
      *      are actual contact points.
      * \return false if planner could not be initialized or if it failed.
      */
-    bool plan(const std::string& handName, const std::string& objectName,
+    bool plan(const std::string& handName, 
+              const std::string& objectName,
               const EigenTransform * objectPose,
               const int maxPlanningSteps,//  = DEFAULT_MAX_PLANNING_STEPS,
               const int repeatPlanning,//   = 1
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              const PlannerType& planType = SimAnn
-              const std::vector<float> *annealParams,
-              const AnnealType t = ANNEAL_DEFAULT);
+              std::vector<float> *annealParams = {},
+              const AnnealingType t = ANNEAL_DEFAULT,
+              const PlannerType& planType = SimAnn);
 
     /**
      * Saves the results as a GraspIt world files and/or inventor files in the given directory,
@@ -215,7 +221,10 @@ private:
      * \param maxPlanningSteps maximum steps (iterations) for the planning algorithm to use
      * \param planType the type of planning algorithm to use. To this point, only simulated annealing is supported.
      */
-    bool initPlanner(const int maxPlanningSteps, const PlannerType& planType = SimAnn);
+    bool initPlanner(const int maxPlanningSteps, 
+                     std::vector<float> *annealParams,
+                     const PlannerType& planType = SimAnn, 
+                     const AnnealingType t = ANNEAL_DEFAULT);
 
     /**
      * \see void EigenGraspPlannerDlg::stopPlanner()
@@ -236,7 +245,10 @@ private:
      * \param stateTemplate tells the planner how the state it is searching on looks like (how many variables, etc).
      * \see void EigenGraspPlannerDlg::plannerInit_clicked()
      */
-    void initPlannerType(const GraspPlanningState& stateTemplate, const PlannerType& pt);
+    void initPlannerType(const GraspPlanningState& stateTemplate,
+                         std::vector<float> *annealParams, 
+                         const PlannerType& pt,                          
+                         const AnnealingType t);
 
 
     /**

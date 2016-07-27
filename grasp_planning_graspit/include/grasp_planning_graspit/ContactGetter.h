@@ -17,7 +17,7 @@
 // graspit
 #include <robot.h>
 #include <grasp.h>
-#include <contact.h>
+#include <contact/contact.h>
 #include <matvec3D.h>
 
 // other
