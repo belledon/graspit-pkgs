@@ -264,6 +264,7 @@ set(MAIN_HEADER_FILES
     ${INCDIR}/GraspItDatabaseManager.h
     ${INCDIR}/GraspItSimpleDBManager.h
     ${INCDIR}/EigenGraspPlanner.h
+    ${INCDIR}/ContactGetter.h
     #    ${INCDIR}/EigenGraspPlannerNoQt.h
     ${INCDIR}/EigenGraspResult.h
     ${INCDIR}/GraspItTypes.h
@@ -279,6 +280,7 @@ set(MAIN_SOURCE_FILES
     src/GraspItSceneManagerHeadless.cpp 
     src/GraspItAccessor.cpp 
     src/EigenGraspPlanner.cpp 
+    src/ContactGetter.cpp
     #    src/EigenGraspPlannerNoQt.cpp 
     src/EigenGraspResult.cpp 
     src/LogBinding.cpp 
