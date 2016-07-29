@@ -17,11 +17,7 @@ using GraspIt::Log;
 
 ContactGetter::ContactGetter(const std::string& name, const SHARED_PTR<GraspItSceneManager>& intr):
     GraspItAccessor(name, intr)
-    // mEnergyCalculator(NULL),
-    // graspitEgPlanner(NULL),
-    // graspitStateType(AxisAngle),
-    // graspitSearchEnergyType(EnergyContact),
-    // useContacts(true),
+
 #ifdef USE_SEPARATE_SOSENSOR
     mIdleSensor(NULL)
 #endif
@@ -41,7 +37,8 @@ ContactGetter::ContactGetter(const std::string& name, const SHARED_PTR<GraspItSc
 
 ContactGetter::~ContactGetter()
 {
-   removeFromIdleListeners();
+    PRINTMSG("ContactGetter destructor");
+    removeFromIdleListeners();
 
 #ifdef USE_SEPARATE_SOSENSOR
     // quit the idle sensor to avoid conflicts when Inventor
@@ -56,6 +53,7 @@ ContactGetter::~ContactGetter()
         mIdleSensor = NULL;
     }
 #endif
+    PRINTMSG("Exit ContactGetter destructor");
 }
 
 void ContactGetter::idleEventFromSceneManager()
@@ -92,11 +90,26 @@ void ContactGetter::onSceneManagerShutdown()
 #endif
 }
 
+// std::list< Contact* > ContactGetter::getGraspContacts()
+// {
+// 	Hand * h = getRobotHand();
+// 	Body * b = getGraspBody();
+// 	return h->getContacts(b);
+// }
 std::list< Contact* > ContactGetter::getGraspContacts()
 {
-	Hand * h = getRobotHand();
-	Body * b = getGraspBody();
-	return h->getContacts(b);
+    Hand *h = getRobotHand();
+    Grasp *g = getHandGrasp(h);
+    int numContacts = g->getNumContacts();
+    
+    std::list< Contact* > cs;
+
+    for (int it; it < numContacts; it ++)
+    {   
+        Contact * c = g->getContact(it);
+        cs.push_back(c);
+    }
+    return cs;
 }
 
 std::vector<double> ContactGetter::getContactPos(Contact * c)

@@ -263,7 +263,7 @@ bool EigenGraspPlanner::plan(const std::string& handName,
                              const int repeatPlanning,
                              const int maxResultsPerRepeat,
                              const bool finishWithAutograsp,
-                             std::vector<float> *annealParams,
+                             std::vector<float> annealParams,
                              const AnnealingType t,
                              const PlannerType& planType)
 {
@@ -317,7 +317,7 @@ bool EigenGraspPlanner::plan(const int maxPlanningSteps,
                              const int repeatPlanning,
                              const int maxResultsPerRepeat,
                              const bool finishWithAutograsp,
-                             std::vector<float> *annealParams,
+                             std::vector<float> annealParams,
                              const AnnealingType t,
                              const PlannerType& planType)
                              
@@ -823,7 +823,7 @@ StateType getStateType(const EigenGraspPlanner::GraspItStateType& st)
 
 
 bool EigenGraspPlanner::initPlanner(const int maxPlanningSteps,
-                                    std::vector<float> *annealParams,
+                                    std::vector<float> annealParams,
                                     const PlannerType& plannerType,
                                     const AnnealingType t)
 {
@@ -953,7 +953,7 @@ void EigenGraspPlanner::initSearchType(GraspPlanningState& graspPlanningState, c
 
 
 void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningState, 
-                                        std::vector<float> *annealParams, 
+                                        std::vector<float> annealParams, 
                                         const PlannerType &pt,
                                         const AnnealingType t)
 {
@@ -972,16 +972,20 @@ void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningS
     // tell the planner which GraspPlanningState parameters to use by the graspPlanningState object.
     // the graspPlanningState object is only used as template in the functions called below (the object
     // is copied by the graspitEgPlanner object)
+
     switch (pt)
     {
     case SimAnn:
     {
+        PRINTMSG("Initializing SimAnn");
         if (graspitEgPlanner) delete graspitEgPlanner;
         SimAnnPlanner * planner = new SimAnnPlanner(mHand);
         planner->useAnnealingParameters(t, annealParams);
         planner->setModelState(&graspPlanningState);
         graspitEgPlanner = planner;
-        break;
+        break;       
+   
+        
     }
     /*case Loop: {
         if (graspitEgPlanner) delete graspitEgPlanner;
