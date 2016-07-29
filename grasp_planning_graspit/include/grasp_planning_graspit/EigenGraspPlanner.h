@@ -99,9 +99,6 @@ public:
     // Later this should be: enum PlannerType {SimAnn, Loop, MultiThreaded };
     enum PlannerType {SimAnn};
 
-    // For now, only using either defaults or custom (user input) annealing values
-    // enum AnnealingType{ANNEAL_DEFAULT, ANNEAL_CUSTOM};
-
     /**
      * Creates and initializes the planner. Also registers the class to enable updates
      * from the scene manager thread by calling addAsSchedulable(). If
@@ -125,7 +122,7 @@ public:
               const int repeatPlanning,// = 1,
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              std::vector<float> *annealParams = {},
+              std::vector<float> annealParams = {},
               const AnnealingType t = ANNEAL_DEFAULT,
               const PlannerType& planType = SimAnn);
 
@@ -165,7 +162,7 @@ public:
               const int repeatPlanning,//   = 1
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              std::vector<float> *annealParams = {},
+              std::vector<float> annealParams = {},
               const AnnealingType t = ANNEAL_DEFAULT,
               const PlannerType& planType = SimAnn);
 
@@ -222,7 +219,7 @@ private:
      * \param planType the type of planning algorithm to use. To this point, only simulated annealing is supported.
      */
     bool initPlanner(const int maxPlanningSteps, 
-                     std::vector<float> *annealParams,
+                     std::vector<float> annealParams,
                      const PlannerType& planType = SimAnn, 
                      const AnnealingType t = ANNEAL_DEFAULT);
 
@@ -246,9 +243,9 @@ private:
      * \see void EigenGraspPlannerDlg::plannerInit_clicked()
      */
     void initPlannerType(const GraspPlanningState& stateTemplate,
-                         std::vector<float> *annealParams, 
-                         const PlannerType& pt,                          
-                         const AnnealingType t);
+                         std::vector<float> annealParams, 
+                         const PlannerType& pt = SimAnn,                          
+                         const AnnealingType t = ANNEAL_DEFAULT);
 
 
     /**
