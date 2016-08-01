@@ -187,6 +187,12 @@ public:
      */
     void getResults(std::vector<EigenGraspResult>& allGrasps) const;
 
+
+    /**
+    * Allows for the passing of custom annealing parameters to the annealing class
+    */
+    void configPlanner(std::map<std::string, double>& params);
+
 protected:
     virtual void idleEventFromSceneManager();
 
