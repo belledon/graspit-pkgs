@@ -770,6 +770,11 @@ void EigenGraspPlanner::getResults(std::vector<EigenGraspResult>& allGrasps) con
     }
 }
 
+void EigenGraspPlanner::configPlanner(std::map<std::string, double>& params)
+{
+    graspitEgPlanner->configParams(params);
+}
+
 
 SearchEnergyType getSearchEnergyType(const EigenGraspPlanner::GraspItSearchEnergyType& st)
 {
