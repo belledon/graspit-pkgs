@@ -1,18 +1,14 @@
 /**
    Implementation of the GraspIt planner interface.
-
    Copyright (C) 2016 Jennifer Buehler
-
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
@@ -34,6 +30,7 @@
 #include <body.h>
 #include <grasp.h>
 #include <eigenGrasp.h>
+#include <EGPlanner/search.h>
 #include <EGPlanner/searchState.h>
 #include <EGPlanner/energy/searchEnergy.h>
 #include <EGPlanner/egPlanner.h>
@@ -256,15 +253,12 @@ void EigenGraspPlanner::ivIdleCallback()
 }
 
 
-bool EigenGraspPlanner::plan(const std::string& handName, 
-                             const std::string& objectName,
+bool EigenGraspPlanner::plan(const std::string& handName, const std::string& objectName,
                              const EigenTransform * objectPose,
                              const int maxPlanningSteps,
                              const int repeatPlanning,
                              const int maxResultsPerRepeat,
                              const bool finishWithAutograsp,
-                             std::vector<float> annealParams,
-                             const AnnealingType t,
                              const PlannerType& planType)
 {
     if (!getGraspItSceneManager()->isInitialized())
@@ -295,8 +289,7 @@ bool EigenGraspPlanner::plan(const std::string& handName,
     // getGraspItSceneManager()->saveGraspItWorld("/home/jenny/test/worlds/startWorld.xml",true);
     // getGraspItSceneManager()->saveInventorWorld("/home/jenny/test/worlds/startWorld.iv",true);
 
-    return plan(maxPlanningSteps, repeatPlanning, maxResultsPerRepeat, finishWithAutograsp, 
-        annealParams, t, planType);
+    return plan(maxPlanningSteps, repeatPlanning, maxResultsPerRepeat, finishWithAutograsp, planType);
 }
 
 bool compareGraspPlanningStates(const GraspPlanningState* g1, const GraspPlanningState* g2)
@@ -317,10 +310,7 @@ bool EigenGraspPlanner::plan(const int maxPlanningSteps,
                              const int repeatPlanning,
                              const int maxResultsPerRepeat,
                              const bool finishWithAutograsp,
-                             std::vector<float> annealParams,
-                             const AnnealingType t,
                              const PlannerType& planType)
-                             
 {
     if (!getGraspItSceneManager()->isInitialized())
     {
@@ -336,7 +326,7 @@ bool EigenGraspPlanner::plan(const int maxPlanningSteps,
     for (int i = 0; i < repeatPlanning; ++i)
     {
         //PRINTMSG("Initializing planning...");
-        if (!initPlanner(maxPlanningSteps, annealParams, planType, t))
+        if (!initPlanner(maxPlanningSteps, planType))
         {
             PRINTERROR("Could not initialize planner.");
             return false;
@@ -770,11 +760,6 @@ void EigenGraspPlanner::getResults(std::vector<EigenGraspResult>& allGrasps) con
     }
 }
 
-void EigenGraspPlanner::configPlanner(std::map<std::string, double>& params)
-{
-    graspitEgPlanner->configParams(params);
-}
-
 
 SearchEnergyType getSearchEnergyType(const EigenGraspPlanner::GraspItSearchEnergyType& st)
 {
@@ -827,10 +812,7 @@ StateType getStateType(const EigenGraspPlanner::GraspItStateType& st)
 
 
 
-bool EigenGraspPlanner::initPlanner(const int maxPlanningSteps,
-                                    std::vector<float> annealParams,
-                                    const PlannerType& plannerType,
-                                    const AnnealingType t)
+bool EigenGraspPlanner::initPlanner(const int maxPlanningSteps, const PlannerType& plannerType)
 {
     Hand * mHand = getCurrentHand();
     GraspableBody * mObject = getCurrentGraspableBody();
@@ -883,7 +865,7 @@ bool EigenGraspPlanner::initPlanner(const int maxPlanningSteps,
 
     initSearchType(graspPlanningState, graspitStateType);
 
-    initPlannerType(graspPlanningState, annealParams, plannerType, t);
+    initPlannerType(graspPlanningState, plannerType);
 
     setPlanningParameters();
     // steps
@@ -957,10 +939,7 @@ void EigenGraspPlanner::initSearchType(GraspPlanningState& graspPlanningState, c
 
 
 
-void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningState, 
-                                        std::vector<float> annealParams, 
-                                        const PlannerType &pt,
-                                        const AnnealingType t)
+void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningState, const PlannerType &pt)
 {
     PRINTMSG("Initializing planner type");
 
@@ -977,20 +956,15 @@ void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningS
     // tell the planner which GraspPlanningState parameters to use by the graspPlanningState object.
     // the graspPlanningState object is only used as template in the functions called below (the object
     // is copied by the graspitEgPlanner object)
-
     switch (pt)
     {
     case SimAnn:
     {
-        PRINTMSG("Initializing SimAnn");
         if (graspitEgPlanner) delete graspitEgPlanner;
         SimAnnPlanner * planner = new SimAnnPlanner(mHand);
-        planner->useAnnealingParameters(t, annealParams);
         planner->setModelState(&graspPlanningState);
         graspitEgPlanner = planner;
-        break;       
-   
-        
+        break;
     }
     /*case Loop: {
         if (graspitEgPlanner) delete graspitEgPlanner;
@@ -1011,6 +985,17 @@ void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningS
 
     plannerReset();
 }
+
+void EigenGraspPlanner::configPlanner(std::map<std::string, double>& params)
+{
+    graspitEgPlanner->configPlanner(params);
+}
+
+void EigenGraspPlanner::configPlanner(PlanningParams *params)
+{
+    graspitEgPlanner->configPlanner(params);
+}
+
 
 
 
@@ -1212,14 +1197,12 @@ void EigenGraspPlanner::inputLoad(const std::string& inputGraspFile)
         PRINTERROR("No input grasp file specified");
         return;
     }
-
     UNIQUE_RECURSIVE_LOCK(graspitEgPlannerMtx);
     if (!graspitEgPlanner)
     {
         PRINTERROR("Planner is NULL!");
         return;
     }
-
     FILE *fp = fopen(inputGraspFile.c_str(), "r");
     bool success = true;
     if (!fp)

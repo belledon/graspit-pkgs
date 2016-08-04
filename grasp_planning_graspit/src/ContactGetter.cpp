@@ -101,13 +101,23 @@ std::list< Contact* > ContactGetter::getGraspContacts()
     Hand *h = getRobotHand();
     Grasp *g = getHandGrasp(h);
     int numContacts = g->getNumContacts();
-    
+    if (numContacts > 0)
+    {
+        char buffer [50];
+        sprintf (buffer, "Found %d contacts for grasp", 
+            numContacts);
+        PRINTMSG(buffer);
+    }
+    else 
+    {
+        PRINTMSG("Did not find contacts for grasp");
+    }
+
     std::list< Contact* > cs;
 
-    for (int it; it < numContacts; it ++)
+    for (int i = 0; i < numContacts; ++i)
     {   
-        Contact * c = g->getContact(it);
-        cs.push_back(c);
+        cs.push_back(g->getContact(i));
     }
     return cs;
 }
