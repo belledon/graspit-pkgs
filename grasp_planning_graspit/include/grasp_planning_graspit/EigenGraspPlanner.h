@@ -3,19 +3,15 @@
 
 /**
    Interface to the GraspIt planning algorithms.
-
    Copyright (C) 2016 Jennifer Buehler
-
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
@@ -26,7 +22,7 @@
 #include <grasp_planning_graspit/EigenGraspResult.h>
 #include <grasp_planning_graspit/GraspItAccessor.h>
 
-#include <EGPlanner/search.h>
+#include <EGPlanner/PlanningParams.h>
 
 #include <vector>
 #include <string>
@@ -118,12 +114,10 @@ public:
      *                       results.
      * \return false if planner could not be initialized or if it failed.
      */
-    bool plan(const int maxPlanningSteps,// DEFAULT_MAX_PLANNING_STEPS
+    bool plan(const int maxPlanningSteps,// = DEFAULT_MAX_PLANNING_STEPS,
               const int repeatPlanning,// = 1,
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              std::vector<float> annealParams = {},
-              const AnnealingType t = ANNEAL_DEFAULT,
               const PlannerType& planType = SimAnn);
 
     /**
@@ -155,15 +149,12 @@ public:
      *      are actual contact points.
      * \return false if planner could not be initialized or if it failed.
      */
-    bool plan(const std::string& handName, 
-              const std::string& objectName,
+    bool plan(const std::string& handName, const std::string& objectName,
               const EigenTransform * objectPose,
               const int maxPlanningSteps,//  = DEFAULT_MAX_PLANNING_STEPS,
               const int repeatPlanning,//   = 1
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              std::vector<float> annealParams = {},
-              const AnnealingType t = ANNEAL_DEFAULT,
               const PlannerType& planType = SimAnn);
 
     /**
@@ -187,12 +178,11 @@ public:
      */
     void getResults(std::vector<EigenGraspResult>& allGrasps) const;
 
-
     /**
     * Allows for the passing of custom annealing parameters to the annealing class
     */
     void configPlanner(std::map<std::string, double>& params);
-
+    void configPlanner(PlanningParams *params);
 protected:
     virtual void idleEventFromSceneManager();
 
@@ -224,10 +214,7 @@ private:
      * \param maxPlanningSteps maximum steps (iterations) for the planning algorithm to use
      * \param planType the type of planning algorithm to use. To this point, only simulated annealing is supported.
      */
-    bool initPlanner(const int maxPlanningSteps, 
-                     std::vector<float> annealParams,
-                     const PlannerType& planType = SimAnn, 
-                     const AnnealingType t = ANNEAL_DEFAULT);
+    bool initPlanner(const int maxPlanningSteps, const PlannerType& planType = SimAnn);
 
     /**
      * \see void EigenGraspPlannerDlg::stopPlanner()
@@ -248,10 +235,7 @@ private:
      * \param stateTemplate tells the planner how the state it is searching on looks like (how many variables, etc).
      * \see void EigenGraspPlannerDlg::plannerInit_clicked()
      */
-    void initPlannerType(const GraspPlanningState& stateTemplate,
-                         std::vector<float> annealParams, 
-                         const PlannerType& pt = SimAnn,                          
-                         const AnnealingType t = ANNEAL_DEFAULT);
+    void initPlannerType(const GraspPlanningState& stateTemplate, const PlannerType& pt);
 
 
     /**
