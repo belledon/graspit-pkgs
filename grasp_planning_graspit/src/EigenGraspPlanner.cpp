@@ -34,7 +34,9 @@
 #include <EGPlanner/searchState.h>
 #include <EGPlanner/energy/searchEnergy.h>
 #include <EGPlanner/egPlanner.h>
+#include <EGPlanner/simAnnPlanner.h>
 #include <EGPlanner/simAnn.h>
+#include <EGPlanner/PlanningParams.h>
 #include <EGPlanner/simAnnPlanner.h>
 // #include <timeTest.h>
 // #include <guidedPlanner.h>
@@ -56,7 +58,6 @@ using GraspIt::Log;
 
 EigenGraspPlanner::EigenGraspPlanner(const std::string& name, const SHARED_PTR<GraspItSceneManager>& intr):
     GraspItAccessor(name, intr),
-    // mEnergyCalculator(NULL),
     graspitEgPlanner(NULL),
     graspitStateType(AxisAngle),
     graspitSearchEnergyType(EnergyContact),
@@ -106,12 +107,17 @@ EigenGraspPlanner::~EigenGraspPlanner()
     }
     graspitEgPlannerMtx.unlock();
 
+    // if (planningParams)
+    // {
+    //     delete planningParams;
+    //     planningParams = NULL;
+    // }
+
     deleteResults();
 
     // if (mEnergyCalculator) delete mEnergyCalculator;
     PRINTMSG("Exit EigenGrasp planner destructor");
 }
-
 
 void EigenGraspPlanner::onSceneManagerShutdown()
 {
@@ -860,8 +866,8 @@ bool EigenGraspPlanner::initPlanner(const int maxPlanningSteps, const PlannerTyp
     }*/
 
     graspitEgPlannerMtx.lock();
-
-    graspitEgPlanner = NULL;
+    // Removing so that it is possible to pass a planner 
+    // graspitEgPlanner = NULL;
 
     initSearchType(graspPlanningState, graspitStateType);
 
@@ -960,11 +966,35 @@ void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningS
     {
     case SimAnn:
     {
-        if (graspitEgPlanner) delete graspitEgPlanner;
-        SimAnnPlanner * planner = new SimAnnPlanner(mHand);
-        planner->setModelState(&graspPlanningState);
-        graspitEgPlanner = planner;
-        break;
+        if (graspitEgPlanner)
+        {
+            switch(graspitEgPlanner->getType())
+            {
+                case PLANNER_SIM_ANN:
+                {
+                    PRINTMSG("A configured Simulated Annealing planner was found")
+                    graspitEgPlanner->setHand(mHand);
+                    graspitEgPlanner->setModelState(&graspPlanningState);
+                    break;
+                }
+                default:
+                {
+                    PRINTERROR("A planner with a type unsopported for Simmulated Annealing was found!")
+                    return;
+                }
+            }
+            break;
+        }
+        else
+        {
+            PRINTMSG("No Simulated Annealing planner exists, using defaults")
+            SimAnnPlanner * planner = new SimAnnPlanner(mHand);
+            planner->setModelState(&graspPlanningState);
+            graspitEgPlanner = planner;
+            break;
+        }
+        
+        
     }
     /*case Loop: {
         if (graspitEgPlanner) delete graspitEgPlanner;
@@ -991,9 +1021,45 @@ void EigenGraspPlanner::configPlanner(std::map<std::string, double>& params)
     graspitEgPlanner->configPlanner(params);
 }
 
-void EigenGraspPlanner::configPlanner(PlanningParams *params)
+void EigenGraspPlanner::configPlanner(EGPlanner *planner)
 {
-    graspitEgPlanner->configPlanner(params);
+    PRINTMSG("Attempting to configure planner");
+    if(graspitEgPlanner)
+    {
+        delete graspitEgPlanner;
+        graspitEgPlanner = planner;
+    }
+    else
+    {   
+        PRINTMSG("No previous planner found, instantiating...")
+        graspitEgPlanner = planner;
+    }
+    PRINTMSG("Finished configurating planner");
+    // if (graspitEgPlanner)
+    // {
+    //     PRINTMSG("Attempting to configure planner");
+    //     graspitEgPlanner->configPlanner(params);
+    //     PRINTMSG("Finished configurating planner");
+    // }
+    // else
+    // {
+    //     PRINTMSG("No planner found, creating and configurating using parameters");
+    //     switch(params->getPlannerType())
+    //     {
+    //         case PLANNER_SIM_ANN:
+    //         {
+    //             SimAnnPlanner * planner = new SimAnnPlanner(mHand);
+    //             graspitEgPlanner = planner;
+    //             break;
+    //         }
+    //         default:
+    //         {
+    //             PRINTERROR("Unknown planner type requested");
+    //             return;
+    //         }
+    //     }
+        
+    // }
 }
 
 
