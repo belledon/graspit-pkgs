@@ -35,7 +35,7 @@
 #include <sstream>
 #include <contact/contact.h>
 #include <map>
-#include <EGPlanner/SimAnnParams.h>
+#include <EGPlanner/simAnnPlanner.h>
 #include <typeinfo>
 
 
@@ -113,9 +113,35 @@ boost::program_options::variables_map loadParams(int argc, char ** argv)
     return vm;
 }
 
+std::string vecToStr(std::vector<double> v)
+{
+    
+    std::stringstream ss;
+    for(size_t i = 0; i < v.size(); ++i)
+    {
+      if(i != 0)
+        ss << ",";
+      ss << v[i];
+    }
+    std::string s = ss.str();
+    return s;
+}
+
+std::string hexToStr(std::string h)
+{
+    size_t len = h.length();
+    std::string newString;
+    for(int i=0; i< len; i+=2)
+    {
+        std::string byte = h.substr(i,2);
+        char chr = (char) (int)strtol(byte.c_str(), NULL, 16);
+        newString.push_back(chr);
+    }
+    return newString;
+}
 bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string& robotFilename,
                 std::string& objectFilename, std::string& outputDirectory, bool& saveSeparate, Eigen::Vector3d& objPos, 
-                std::vector<double> annealParams, int& maxIterations, int& keepMaxPlanningResults, 
+                std::vector<double>& annealParams, int& maxIterations, int& keepMaxPlanningResults, 
                 std::string& savePrefix, bool& autoGrasp)
 {
     autoGrasp = false;
@@ -248,18 +274,15 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
     if (vm.count("anneal"))
     {
          std::vector<double> vals=vm["anneal"].as<std::vector<double> >();
-         std::vector<double> tVals;
-         tVals.reserve(8);
+    
+         PRINTMSG("Specified "<<vecToStr(vals)<<" values for annealing");
          if (vals.size() !=8)
          {
             PRINTERROR("Must specify 8 values for --aneal: yc, hc, ydims, hdims, nbr_adj, err_adj, def_t0, def_k0");
             PRINTMSG(desc);
          }
-         for (unsigned ind = 0; ind < 8; ind++)
-         {
-            tVals.push_back(vals.at(ind));
-         }
-         annealParams = tVals;
+       
+         annealParams = vals;
         
     }
    
@@ -292,32 +315,7 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
     return true;
 }
 
-std::string vecToStr(std::vector<double> v)
-{
-    
-    std::stringstream ss;
-    for(size_t i = 0; i < v.size(); ++i)
-    {
-      if(i != 0)
-        ss << ",";
-      ss << v[i];
-    }
-    std::string s = ss.str();
-    return s;
-}
 
-std::string hexToStr(std::string h)
-{
-    size_t len = h.length();
-    std::string newString;
-    for(int i=0; i< len; i+=2)
-    {
-        std::string byte = h.substr(i,2);
-        char chr = (char) (int)strtol(byte.c_str(), NULL, 16);
-        newString.push_back(chr);
-    }
-    return newString;
-}
 
 int main(int argc, char **argv)
 {
@@ -355,34 +353,14 @@ int main(int argc, char **argv)
     SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("ContactGetter", graspitMgr));
 
 #ifdef USE_EIGENGRASP_NOQT
+    PRINTMSG("Using EigenGraspPlannerNoQt")
     SHARED_PTR<GraspIt::EigenGraspPlannerNoQt> p(new GraspIt::EigenGraspPlannerNoQt(name, graspitMgr));
 #else
+    PRINTMSG("Using EigenGraspPlanner")
     SHARED_PTR<GraspIt::EigenGraspPlanner> p(new GraspIt::EigenGraspPlanner(name, graspitMgr));
 #endif
 
-    PRINTMSG("Configurating planner")
-    if (!annealParams.empty())
-    {
-        std::vector<std::string> keys;
-        keys.push_back("YC");
-        keys.push_back("HC");
-        keys.push_back("YDIMS");
-        keys.push_back("HDIMS");
-        keys.push_back("NBR_ADJ");
-        keys.push_back("ERR_ADJ");
-        keys.push_back("DEF_T0");
-        keys.push_back("DEF_K0");
 
-        std::map<std::string, double> annealMap;
-        for (size_t i = 0; i < keys.size(); ++i)
-        {
-            annealMap[keys[i]] = annealParams[i];
-        }
-         // p->configPlanner(annealMap);
-        PlanningParams * planParams = new SimAnnParams(annealMap);
-        p->configPlanner(planParams);
-    }
-   
     // TODO parameterize:
     // Names for robot and object if not loaded from a world file.
     // If loaded from a world file, will be overwritten.
@@ -453,6 +431,46 @@ int main(int argc, char **argv)
         graspitMgr->saveRobotAsInventor(outputDirectory + "/"+ savePrefix +"/robotStartpose.iv", useRobotName, createDir, forceWrite);
         graspitMgr->saveObjectAsInventor(outputDirectory + "/"+ savePrefix + "/object.iv", useObjectName, createDir, forceWrite);
     }
+
+    PRINTMSG("Checking for planner config")
+    if (!annealParams.empty())
+    {
+        PRINTMSG("Planner config found, configurating planner")
+        std::vector<std::string> keys;
+        keys.push_back("YC");
+        keys.push_back("HC");
+        keys.push_back("YDIMS");
+        keys.push_back("HDIMS");
+        keys.push_back("NBR_ADJ");
+        keys.push_back("ERR_ADJ");
+        keys.push_back("DEF_T0");
+        keys.push_back("DEF_K0");
+
+        PRINTMSG("Formatting planner config")
+        std::map<std::string, double> annealMap;
+        for (size_t i = 0; i < keys.size(); ++i)
+        {
+            annealMap[keys[i]] = annealParams[i];
+        }
+         // p->configPlanner(annealMap);
+        PRINTMSG("Creating parameter object...");
+        SimAnnParams sap = SimAnnParams(annealMap);
+        SimAnnParams * planParams = &sap;
+        
+        PRINTMSG("Creating SimAnn Planner");
+        SimAnnPlanner * SAPlanner = new SimAnnPlanner();
+        PRINTMSG("Configurating planner...");
+        SAPlanner->configPlanner(planParams);
+        p->configPlanner(SAPlanner);
+        PRINTMSG("Planner configuration complete")
+    }
+    
+    else
+    {
+        PRINTMSG("No config found, using defaults")
+    }
+
+
 
     int repeatPlanning = 1;
 
