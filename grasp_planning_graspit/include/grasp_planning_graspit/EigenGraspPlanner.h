@@ -23,7 +23,6 @@
 #include <grasp_planning_graspit/GraspItAccessor.h>
 
 #include <EGPlanner/PlanningParams.h>
-
 #include <vector>
 #include <string>
 
@@ -78,6 +77,8 @@ class EigenGraspPlanner: public QObject, public GraspItAccessor
     Q_OBJECT
 
 public:
+
+   
     // So far, only AxisAngle supported, as others not tested yet.
     // Later will be: enum  GraspItStateType{Complete, AxisAngle, Ellipsoid, Approach};
     enum GraspItStateType  {AxisAngle};
@@ -103,6 +104,8 @@ public:
      */
     EigenGraspPlanner(const std::string& name, const SHARED_PTR<GraspItSceneManager>& i);
     virtual ~EigenGraspPlanner();
+
+
 
     /**
      * Starts planning with the specified planner type. NOTE: Only simulated annealing is tested so far.
@@ -182,7 +185,8 @@ public:
     * Allows for the passing of custom annealing parameters to the annealing class
     */
     void configPlanner(std::map<std::string, double>& params);
-    void configPlanner(PlanningParams *params);
+    void configPlanner(EGPlanner *planner);
+
 protected:
     virtual void idleEventFromSceneManager();
 
@@ -359,6 +363,9 @@ private:
 
     EGPlanner * graspitEgPlanner;
     RECURSIVE_MUTEX graspitEgPlannerMtx;
+
+    // For changing planning parameters in the derived planning class
+    //PlanningParams * planningParams;
 
     // The state type to use for GraspIt. Default is STATE_AXIS_ANGLE.
     GraspItStateType graspitStateType;
