@@ -99,7 +99,8 @@ boost::program_options::options_description getOptions()
     ("save-separate", "if this flag is set, robot and object files will be saved separately in addition to the normal result.")
     ("keep", boost::program_options::value<int>(), "Number of grasps stored, from best to worst.")
     ("save-prefix", boost::program_options::value<std::string>(), "Save prefix for output")
-    ("autograsp", "Flag to finish grasp with autograsp");
+    ("autograsp", "Flag to finish grasp with autograsp")
+    ("ocl-pos", boost::program_options::value<std::vector<float> >()->multitoken(), "Position of optional occluder");
     return desc;
 }
 
@@ -141,8 +142,8 @@ std::string hexToStr(std::string h)
 }
 bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string& robotFilename,
                 std::string& objectFilename, std::string& outputDirectory, bool& saveSeparate, Eigen::Vector3d& objPos, 
-                std::vector<double>& annealParams, int& maxIterations, int& keepMaxPlanningResults, 
-                std::string& savePrefix, bool& autoGrasp)
+                std::vector<double>& annealParams, int& maxPlanningSteps, int& keepMaxPlanningResults, 
+                std::string& savePrefix, bool& autoGrasp, std::vector<float>& oclPos, bool& makeOcl)
 {
     autoGrasp = false;
     saveSeparate = false;
@@ -249,12 +250,13 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
 
     if (vm.count("iter"))
     {
-        maxIterations = vm["iter"].as<int>();
+        int maxIterations = vm["iter"].as<int>();
         PRINTMSG("Number of iterations: " << maxIterations);
         if (maxIterations < 35000)
         {
             PRINTWARN("Planning is not working well with max iterations < 35000");
         }
+        maxPlanningSteps = maxIterations;
     }
 
 
@@ -312,6 +314,18 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
     {
         autoGrasp = true;
     }
+
+    if (vm.count("ocl-pos"))
+    {
+        std::vector<float> vals=vm["ocl-pos"].as<std::vector<float> >();
+        if (vals.size()==0)
+        {
+            PRINTERROR("Must specify 3n ((int)n > 0) values for --ocl-pos: x, y and z (specified "<<vals.size()<<")");
+            PRINTMSG(desc);
+        }
+        oclPos = vals;
+        makeOcl = true;
+    }
     return true;
 }
 
@@ -331,6 +345,8 @@ int main(int argc, char **argv)
     bool saveSeparate;
     bool autoGrasp;
     Eigen::Vector3d objPos;
+    bool makeOcl;
+    std::vector<float> oclPos;
     int maxPlanningSteps = 50000;
     int keepMaxPlanningResults = 3;
     std::string savePrefix = "world";
@@ -338,7 +354,7 @@ int main(int argc, char **argv)
    
 
     if (!loadParams(argc, argv, worldFilename, robotFilename, objectFilename, outputDirectory, saveSeparate, objPos,
-        annealParams, maxPlanningSteps, keepMaxPlanningResults, savePrefix, autoGrasp))
+        annealParams, maxPlanningSteps, keepMaxPlanningResults, savePrefix, autoGrasp, oclPos, makeOcl))
     {
         PRINTERROR("Could not read arguments");
         return 1;
@@ -366,7 +382,7 @@ int main(int argc, char **argv)
     // If loaded from a world file, will be overwritten.
     std::string useRobotName="Robot1";
     std::string useObjectName="Object1";
-
+    
     if (!worldFilename.empty())
     {
         PRINTMSG("Loading world");
@@ -406,15 +422,40 @@ int main(int argc, char **argv)
         robotTransform.setIdentity();
         objectTransform.setIdentity();
         objectTransform.translate(objPos);
-        // objectTransform.translate(Eigen::Vector3d(100,0,0));
+        
         std::string robotName(useRobotName); 
         std::string objectName(useObjectName);
+        
         if ((graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0) ||
                 (graspitMgr->loadObject(objectFilename, objectName, true, objectTransform)))
         {
             PRINTERROR("Could not load robot or object");
             return 1;
         }
+ 
+        if (makeOcl)
+        {
+            PRINTMSG("Creating occluder");
+            size_t numOcl = oclPos.size() / 3;
+            for (int i = 0; i < numOcl; ++i)
+            {
+                
+                int start = i * 3;
+                Eigen::Vector3d oclp;
+                oclp = Eigen::Vector3d(oclPos[start], oclPos[start + 1], oclPos[start + 2]);
+                std::stringstream occulderNameSS;
+                occulderNameSS << "Ocludder_" << i;
+                std::string occulderName = occulderNameSS.str();
+                GraspIt::EigenTransform occluderTransform;
+                occluderTransform.setIdentity();
+                occluderTransform.translate(oclp);
+                if (graspitMgr->loadObject(objectFilename, occulderName, false, occluderTransform))
+                {
+                    PRINTERROR("Could not load occluder");
+                    return 1;
+                }
+            } 
+        }  
     }
     
     
@@ -423,13 +464,14 @@ int main(int argc, char **argv)
     bool forceWrite = createDir;  // only enforce if creating dir is also allowed
     
     // in case one wants to view the initial world before planning, save it:
-    graspitMgr->saveGraspItWorld(outputDirectory + "/" + savePrefix + "/startWorld.xml", createDir);
-    graspitMgr->saveInventorWorld(outputDirectory + "/" + savePrefix + "/startWorld.iv", createDir);
+    // graspitMgr->saveGraspItWorld(outputDirectory + "/" + savePrefix + "/startWorld.xml", createDir);
+    // graspitMgr->saveInventorWorld(outputDirectory + "/" + savePrefix + "/startWorld.iv", createDir);
 
     if (saveSeparate)
     {
         graspitMgr->saveRobotAsInventor(outputDirectory + "/"+ savePrefix +"/robotStartpose.iv", useRobotName, createDir, forceWrite);
         graspitMgr->saveObjectAsInventor(outputDirectory + "/"+ savePrefix + "/object.iv", useObjectName, createDir, forceWrite);
+       // graspitMgr->saveObjectAsInventor(outputDirectory + "/"+ savePrefix + "/object_oc.iv", useOccluderName, createDir, forceWrite);
     }
 
     PRINTMSG("Checking for planner config")
