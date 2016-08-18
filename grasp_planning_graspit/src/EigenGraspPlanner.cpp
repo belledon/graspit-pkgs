@@ -359,7 +359,7 @@ bool EigenGraspPlanner::plan(const int maxPlanningSteps,
         }
 
         PRINTMSG("Initiating planning, trial #"<<i);
-
+        graspitEgPlanner->printPlanner();
         scheduleForIdleEventUpdate();
         setPlannerCommand(START);
 
@@ -850,6 +850,7 @@ bool EigenGraspPlanner::initPlanner(const int maxPlanningSteps, const PlannerTyp
 
     // mHand->getGrasp()->setGravity(true);
     mHand->getGrasp()->setGravity(false);
+    PRINTMSG("Instantiating the initial state with that of the loaded world")
     GraspPlanningState graspPlanningState(mHand);
     graspPlanningState.setObject(mObject);
     StateType _stateType = getStateType(graspitStateType);
@@ -931,8 +932,8 @@ void EigenGraspPlanner::initSearchType(GraspPlanningState& graspPlanningState, c
         PRINTERROR("Unsupported search type");
     }
     }
-
-    graspPlanningState.reset();
+    //CHANGED to see if input could be preserved. 
+    //graspPlanningState.reset();
 
     // force a reset of the planner
     graspitEgPlannerMtx.lock();
@@ -972,8 +973,10 @@ void EigenGraspPlanner::initPlannerType(const GraspPlanningState& graspPlanningS
             {
                 case PLANNER_SIM_ANN:
                 {
-                    PRINTMSG("A configured Simulated Annealing planner was found")
+                    PRINTMSG("A configured Simulated Annealing planner was found with the following configuration:")
+                    graspitEgPlanner->printPlanner();
                     graspitEgPlanner->setHand(mHand);
+                    PRINTMSG("Setting planner initial state");
                     graspitEgPlanner->setModelState(&graspPlanningState);
                     break;
                 }
