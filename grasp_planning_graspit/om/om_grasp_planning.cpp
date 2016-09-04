@@ -365,12 +365,9 @@ int main(int argc, char **argv)
     PRINTMSG("Creating planner");
 
     std::string name = "EigenGraspPlanner1";  // TODO make parameter
-    SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());
-<<<<<<< HEAD
-    SHARED  _PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("ContactGetter", graspitMgr));
-=======
+    SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());    
     SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("ContactGetter", graspitMgr));
->>>>>>> 1eef24b4d23da185c46241146943d21d6dd4276b
+
 
 #ifdef USE_EIGENGRASP_NOQT
     PRINTMSG("Using EigenGraspPlannerNoQt")
