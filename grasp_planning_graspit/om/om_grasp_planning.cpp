@@ -33,9 +33,11 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <contact.h>
+#include <contact/contact.h>
+#include <map>
+#include <EGPlanner/simAnnPlanner.h>
+#include <typeinfo>
 
-#include <EGPlanner/search.h>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -93,11 +95,12 @@ boost::program_options::options_description getOptions()
     ("obj", boost::program_options::value<std::string>(), "filename for the object file -- ALTERNATIVE to parameter wld!")
     ("iter", boost::program_options::value<int>(), "Maximum number of iterations for the planning algorithm")
     ("obj-pos", boost::program_options::value<std::vector<float> >()->multitoken(), "Position of the object relative to the robot: Specify one x, y and z value in quotes.")
-    ("anneal", boost::program_options::value<std::vector<float> >()->multitoken(), "Annealing parameters to find suitable local minima. Specificy one for each of the following...")
+    ("anneal", boost::program_options::value<std::vector<double> >()->multitoken(), "Annealing parameters to find suitable local minima. Specificy one for each of the following...")
     ("save-separate", "if this flag is set, robot and object files will be saved separately in addition to the normal result.")
     ("keep", boost::program_options::value<int>(), "Number of grasps stored, from best to worst.")
     ("save-prefix", boost::program_options::value<std::string>(), "Save prefix for output")
-    ("autograsp", "Flag to finish grasp with autograsp");
+    ("autograsp", "Flag to finish grasp with autograsp")
+    ("ocl-pos", boost::program_options::value<std::vector<float> >()->multitoken(), "Position of optional occluder");
     return desc;
 }
 
@@ -111,10 +114,36 @@ boost::program_options::variables_map loadParams(int argc, char ** argv)
     return vm;
 }
 
+std::string vecToStr(std::vector<double> v)
+{
+    
+    std::stringstream ss;
+    for(size_t i = 0; i < v.size(); ++i)
+    {
+      if(i != 0)
+        ss << ",";
+      ss << v[i];
+    }
+    std::string s = ss.str();
+    return s;
+}
+
+std::string hexToStr(std::string h)
+{
+    size_t len = h.length();
+    std::string newString;
+    for(int i=0; i< len; i+=2)
+    {
+        std::string byte = h.substr(i,2);
+        char chr = (char) (int)strtol(byte.c_str(), NULL, 16);
+        newString.push_back(chr);
+    }
+    return newString;
+}
 bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string& robotFilename,
                 std::string& objectFilename, std::string& outputDirectory, bool& saveSeparate, Eigen::Vector3d& objPos, 
-                std::vector<float> annealParams, AnnealingType t, int& maxIterations, int& keepMaxPlanningResults, 
-                std::string& savePrefix, bool& autoGrasp)
+                std::vector<double>& annealParams, int& maxPlanningSteps, int& keepMaxPlanningResults, 
+                std::string& savePrefix, bool& autoGrasp, std::vector<float>& oclPos, bool& makeOcl)
 {
     autoGrasp = false;
     saveSeparate = false;
@@ -221,18 +250,20 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
 
     if (vm.count("iter"))
     {
-        maxIterations = vm["iter"].as<int>();
+        int maxIterations = vm["iter"].as<int>();
         PRINTMSG("Number of iterations: " << maxIterations);
         if (maxIterations < 35000)
         {
             PRINTWARN("Planning is not working well with max iterations < 35000");
         }
+        maxPlanningSteps = maxIterations;
     }
 
 
     if (vm.count("obj-pos"))
     {
          std::vector<float> vals=vm["obj-pos"].as<std::vector<float> >();
+        
          if (vals.size()!=3)
          {
              PRINTERROR("Must specify 3 values for --obj-pos: x, y and z (specified "<<vals.size()<<")");
@@ -244,14 +275,17 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
 
     if (vm.count("anneal"))
     {
-         std::vector<float> vals=vm["anneal"].as<std::vector<float> >();
-         if (val.size() !=3)
+         std::vector<double> vals=vm["anneal"].as<std::vector<double> >();
+    
+         PRINTMSG("Specified "<<vecToStr(vals)<<" values for annealing");
+         if (vals.size() !=8)
          {
             PRINTERROR("Must specify 8 values for --aneal: yc, hc, ydims, hdims, nbr_adj, err_adj, def_t0, def_k0");
             PRINTMSG(desc);
          }
+       
          annealParams = vals;
-         t = ANNEAL_CUSTOM;
+        
     }
    
     if (vm.count("save-separate"))
@@ -280,21 +314,21 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
     {
         autoGrasp = true;
     }
+
+    if (vm.count("ocl-pos"))
+    {
+        std::vector<float> vals=vm["ocl-pos"].as<std::vector<float> >();
+        if (vals.size()==0)
+        {
+            PRINTERROR("Must specify 3n ((int)n > 0) values for --ocl-pos: x, y and z (specified "<<vals.size()<<")");
+            PRINTMSG(desc);
+        }
+        oclPos = vals;
+        makeOcl = true;
+    }
     return true;
 }
 
-std::string vecToStr(std::vector<double> v)
-{
-    std::stringstream ss;
-    for(size_t i = 0; i < v.size(); ++i)
-    {
-      if(i != 0)
-        ss << ",";
-      ss << v[i];
-    }
-    std::string s = ss.str();
-    return s;
-}
 
 
 int main(int argc, char **argv)
@@ -311,39 +345,44 @@ int main(int argc, char **argv)
     bool saveSeparate;
     bool autoGrasp;
     Eigen::Vector3d objPos;
+    bool makeOcl;
+    std::vector<float> oclPos;
     int maxPlanningSteps = 50000;
     int keepMaxPlanningResults = 3;
     std::string savePrefix = "world";
-    std::vector<float> annealParams;
-    AnnealingType annealPreset = ANNEAL_DEFAULT;
+    std::vector<double> annealParams;
+   
 
     if (!loadParams(argc, argv, worldFilename, robotFilename, objectFilename, outputDirectory, saveSeparate, objPos,
-        annealParams, annealPreset, maxPlanningSteps, keepMaxPlanningResults, savePrefix, autoGrasp))
+        annealParams, maxPlanningSteps, keepMaxPlanningResults, savePrefix, autoGrasp, oclPos, makeOcl))
     {
         PRINTERROR("Could not read arguments");
         return 1;
     }
 
-    std::vector<float> *aP = &annealParams;
+
 
     PRINTMSG("Creating planner");
 
     std::string name = "EigenGraspPlanner1";  // TODO make parameter
     SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());
-    SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("cg", graspitMgr));
+    SHARED  _PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("ContactGetter", graspitMgr));
 
 #ifdef USE_EIGENGRASP_NOQT
+    PRINTMSG("Using EigenGraspPlannerNoQt")
     SHARED_PTR<GraspIt::EigenGraspPlannerNoQt> p(new GraspIt::EigenGraspPlannerNoQt(name, graspitMgr));
 #else
+    PRINTMSG("Using EigenGraspPlanner")
     SHARED_PTR<GraspIt::EigenGraspPlanner> p(new GraspIt::EigenGraspPlanner(name, graspitMgr));
 #endif
+
 
     // TODO parameterize:
     // Names for robot and object if not loaded from a world file.
     // If loaded from a world file, will be overwritten.
     std::string useRobotName="Robot1";
     std::string useObjectName="Object1";
-
+    
     if (!worldFilename.empty())
     {
         PRINTMSG("Loading world");
@@ -383,15 +422,40 @@ int main(int argc, char **argv)
         robotTransform.setIdentity();
         objectTransform.setIdentity();
         objectTransform.translate(objPos);
-        // objectTransform.translate(Eigen::Vector3d(100,0,0));
+        
         std::string robotName(useRobotName); 
         std::string objectName(useObjectName);
+        
         if ((graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0) ||
                 (graspitMgr->loadObject(objectFilename, objectName, true, objectTransform)))
         {
             PRINTERROR("Could not load robot or object");
             return 1;
         }
+ 
+        if (makeOcl)
+        {
+            PRINTMSG("Creating occluder");
+            size_t numOcl = oclPos.size() / 3;
+            for (int i = 0; i < numOcl; ++i)
+            {
+                
+                int start = i * 3;
+                Eigen::Vector3d oclp;
+                oclp = Eigen::Vector3d(oclPos[start], oclPos[start + 1], oclPos[start + 2]);
+                std::stringstream occulderNameSS;
+                occulderNameSS << "Ocludder_" << i;
+                std::string occulderName = occulderNameSS.str();
+                GraspIt::EigenTransform occluderTransform;
+                occluderTransform.setIdentity();
+                occluderTransform.translate(oclp);
+                if (graspitMgr->loadObject(objectFilename, occulderName, false, occluderTransform))
+                {
+                    PRINTERROR("Could not load occluder");
+                    return 1;
+                }
+            } 
+        }  
     }
     
     
@@ -400,19 +464,63 @@ int main(int argc, char **argv)
     bool forceWrite = createDir;  // only enforce if creating dir is also allowed
     
     // in case one wants to view the initial world before planning, save it:
-    graspitMgr->saveGraspItWorld(outputDirectory + "/" + savePrefix + "/startWorld.xml", createDir);
-    graspitMgr->saveInventorWorld(outputDirectory + "/" + savePrefix + "/startWorld.iv", createDir);
+    // graspitMgr->saveGraspItWorld(outputDirectory + "/" + savePrefix + "/startWorld.xml", createDir);
+    // graspitMgr->saveInventorWorld(outputDirectory + "/" + savePrefix + "/startWorld.iv", createDir);
 
     if (saveSeparate)
     {
         graspitMgr->saveRobotAsInventor(outputDirectory + "/"+ savePrefix +"/robotStartpose.iv", useRobotName, createDir, forceWrite);
         graspitMgr->saveObjectAsInventor(outputDirectory + "/"+ savePrefix + "/object.iv", useObjectName, createDir, forceWrite);
+       // graspitMgr->saveObjectAsInventor(outputDirectory + "/"+ savePrefix + "/object_oc.iv", useOccluderName, createDir, forceWrite);
     }
 
-    int repeatPlanning = 1;
-    
-    p->plan(maxPlanningSteps, repeatPlanning, keepMaxPlanningResults, autoGrasp, annealParams, annealPreset);
+    PRINTMSG("Checking for planner config")
+    if (!annealParams.empty())
+    {
+        PRINTMSG("Planner config found, configurating planner")
+        std::vector<std::string> keys;
+        keys.push_back("YC");
+        keys.push_back("HC");
+        keys.push_back("YDIMS");
+        keys.push_back("HDIMS");
+        keys.push_back("NBR_ADJ");
+        keys.push_back("ERR_ADJ");
+        keys.push_back("DEF_T0");
+        keys.push_back("DEF_K0");
 
+        PRINTMSG("Formatting planner config")
+        std::map<std::string, double> annealMap;
+        for (size_t i = 0; i < keys.size(); ++i)
+        {
+            annealMap[keys[i]] = annealParams[i];
+        }
+         // p->configPlanner(annealMap);
+        PRINTMSG("Creating parameter object...");
+        SimAnnParams sap = SimAnnParams(annealMap);
+        SimAnnParams * planParams = &sap;
+        
+        PRINTMSG("Creating SimAnn Planner");
+        SimAnnPlanner * SAPlanner = new SimAnnPlanner();
+        PRINTMSG("Configurating planner...");
+        SAPlanner->configPlanner(planParams);
+        p->configPlanner(SAPlanner);
+        PRINTMSG("Planner configuration complete")
+    }
+    
+    else
+    {
+        PRINTMSG("No config found, using defaults")
+    }
+
+
+
+    int repeatPlanning = 1;
+
+    PRINTMSG("Planning commencing...")
+    
+    p->plan(maxPlanningSteps, repeatPlanning, keepMaxPlanningResults, autoGrasp);
+    
+    PRINTMSG("Planning complete!")
     PRINTMSG("Saving results...");
 
     bool saveWorld = true;
@@ -426,24 +534,19 @@ int main(int argc, char **argv)
 
     std::string robotName(useRobotName);
     std::string objectName(useObjectName);
-    // SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("cg", graspitMgr));
-    std::list< Contact * > bodyContacts = cg->getGraspContacts();
-//    GraspItAccessor * gc = new GraspIt::GraspItAccessor("gc", graspitMgr) ;
 
-    // = GraspItAccessor("gc", graspitMgr);
-    //Body *graspedBody = gc->getBody(useObjectName);
-    //std::list< Contact * > bodyContacts = getContacts(graspedBody);
+    std::list< Contact * > bodyContacts = cg->getGraspContacts();
 
     std::ofstream dFile((outputDirectory + "/" + savePrefix + "/data.txt").c_str());
-    //dFile.open(outputDirectory + "/" + savePrefix + "/data.txt");
-
 
     PRINTMSG("Writing Grasp results...");
     std::vector<GraspIt::EigenGraspResult>::iterator it;
     for (it = allGrasps.begin(); it != allGrasps.end(); ++it)
     {
+
         if (dFile.is_open())
-        {
+        {   
+            dFile << "Config:\t" << hexToStr(savePrefix.c_str()) << "\n";
             int graspNumber = it - allGrasps.begin();
             dFile << "Object\t" << objectName;
             dFile << "Grasp\t" << graspNumber << "\n";
@@ -459,21 +562,21 @@ int main(int argc, char **argv)
             std::list<Contact *>::iterator itr;
             for(itr=bodyContacts.begin();itr != bodyContacts.end();++itr)
                 {
-                   std::vector<double> positions = cg->getContactPos(*itr);
-                   dFile << "positions\t" << vecToStr(positions) << "\n";
-                   std::vector<double> normals = cg->getContactNorm(*itr);
-                   dFile << "normals\t" << vecToStr(positions) <<"\n";
+
+                    std::vector<double> positions = cg->getContactPos(*itr);
+                    dFile << "positions\t" << vecToStr(positions) << "\n";
+                    // std::vector<double> normals = cg->getContactNorm(*itr);
+                    // std::cout << "normals\t" << vecToStr(positions) <<"\n";
                 }
             dFile << "contacts_end";
         }
         else PRINTMSG("Unable to open data file");
     }
-    if (dFile.is_open()) 
-    {  
+   
     dFile.close(); 
-    }
+  
 
 
     PRINTMSG("Quitting program.");
-    return 1;
+    //return 1;
 }

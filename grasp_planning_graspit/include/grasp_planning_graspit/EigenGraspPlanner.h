@@ -3,19 +3,15 @@
 
 /**
    Interface to the GraspIt planning algorithms.
-
    Copyright (C) 2016 Jennifer Buehler
-
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
@@ -26,6 +22,7 @@
 #include <grasp_planning_graspit/EigenGraspResult.h>
 #include <grasp_planning_graspit/GraspItAccessor.h>
 
+#include <EGPlanner/PlanningParams.h>
 #include <vector>
 #include <string>
 
@@ -80,6 +77,8 @@ class EigenGraspPlanner: public QObject, public GraspItAccessor
     Q_OBJECT
 
 public:
+
+   
     // So far, only AxisAngle supported, as others not tested yet.
     // Later will be: enum  GraspItStateType{Complete, AxisAngle, Ellipsoid, Approach};
     enum GraspItStateType  {AxisAngle};
@@ -106,6 +105,8 @@ public:
     EigenGraspPlanner(const std::string& name, const SHARED_PTR<GraspItSceneManager>& i);
     virtual ~EigenGraspPlanner();
 
+
+
     /**
      * Starts planning with the specified planner type. NOTE: Only simulated annealing is tested so far.
      * \see void EigenGraspPlannerDlg::startPlanner() and void EigenGraspPlannerDlg::plannerStart_clicked()
@@ -120,9 +121,7 @@ public:
               const int repeatPlanning,// = 1,
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              const PlannerType& planType = SimAnn,
-              const std::vector<float> *annealParams,
-              const AnnealType t = ANNEAL_DEFAULT);
+              const PlannerType& planType = SimAnn);
 
     /**
      * Sets the current hand and object before calling plan(const int, const int).
@@ -159,9 +158,7 @@ public:
               const int repeatPlanning,//   = 1
               const int maxResultsPerRepeat,// = DEFAULT_MAX_RESULTS_PER_REPEAT,
               const bool finishWithAutograsp,// = DEFAULT_FINISH_WITH_AUTOGRASP,
-              const PlannerType& planType = SimAnn
-              const std::vector<float> *annealParams,
-              const AnnealType t = ANNEAL_DEFAULT);
+              const PlannerType& planType = SimAnn);
 
     /**
      * Saves the results as a GraspIt world files and/or inventor files in the given directory,
@@ -183,6 +180,12 @@ public:
      * Returns the results of the grasp planning as EigenGraspResult objects.
      */
     void getResults(std::vector<EigenGraspResult>& allGrasps) const;
+
+    /**
+    * Allows for the passing of custom annealing parameters to the annealing class
+    */
+    void configPlanner(std::map<std::string, double>& params);
+    void configPlanner(EGPlanner *planner);
 
 protected:
     virtual void idleEventFromSceneManager();
@@ -360,6 +363,9 @@ private:
 
     EGPlanner * graspitEgPlanner;
     RECURSIVE_MUTEX graspitEgPlannerMtx;
+
+    // For changing planning parameters in the derived planning class
+    //PlanningParams * planningParams;
 
     // The state type to use for GraspIt. Default is STATE_AXIS_ANGLE.
     GraspItStateType graspitStateType;
