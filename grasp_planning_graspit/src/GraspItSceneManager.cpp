@@ -622,6 +622,7 @@ int GraspItSceneManager::loadObject(const std::string& filename, const std::stri
     Body * object = NULL;
     if (asGraspable)
     {
+        PRINTMSG("Object is graspable, attempting to load as such...")
         object = graspitWorld->importBody("GraspableBody", QString(filename.c_str()));
     }
     else
