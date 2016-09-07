@@ -601,6 +601,8 @@ int GraspItSceneManager::loadObject(const std::string& filename, const std::stri
         return -2;
     }
 
+    PRINTMSG("Working in with " << filename)
+
     UNIQUE_RECURSIVE_LOCK(graspitWorldMtx);
     if (!graspitWorld)
     {
