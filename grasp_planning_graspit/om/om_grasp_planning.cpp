@@ -422,8 +422,9 @@ int main(int argc, char **argv)
         GraspIt::EigenTransform objectTransform;
         robotTransform.setIdentity();
         objectTransform.setIdentity();
-        objectTransform.translate(objPos);
-        
+        // objectTransform.translate(objPos);
+        // We want to keep the object at the absolute origin
+        robotTransform.translate(objPos);
         std::string robotName(useRobotName); 
         std::string objectName(useObjectName);
         
