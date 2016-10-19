@@ -94,7 +94,7 @@ boost::program_options::options_description getOptions()
     ("rob", boost::program_options::value<std::string>(), "filename for the robot file -- ALTERNATIVE to parameter wld!")
     ("obj", boost::program_options::value<std::string>(), "filename for the object file -- ALTERNATIVE to parameter wld!")
     ("iter", boost::program_options::value<int>(), "Maximum number of iterations for the planning algorithm")
-    ("obj-pos", boost::program_options::value<std::vector<float> >()->multitoken(), "Position of the object relative to the robot: Specify one x, y and z value in quotes.")
+    ("rob-pos", boost::program_options::value<std::vector<float> >()->multitoken(), "Position of the robot relative to the origin: Specify one x, y and z value in quotes.")
     ("anneal", boost::program_options::value<std::vector<double> >()->multitoken(), "Annealing parameters to find suitable local minima. Specificy one for each of the following...")
     ("save-separate", "if this flag is set, robot and object files will be saved separately in addition to the normal result.")
     ("keep", boost::program_options::value<int>(), "Number of grasps stored, from best to worst.")
@@ -114,7 +114,9 @@ boost::program_options::variables_map loadParams(int argc, char ** argv)
     return vm;
 }
 
-std::string vecToStr(std::vector<double> v)
+template <class T>
+
+std::string vecToStr(std::vector<T> v)
 {
     
     std::stringstream ss;
@@ -260,16 +262,16 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
     }
 
 
-    if (vm.count("obj-pos"))
+    if (vm.count("rob-pos"))
     {
-         std::vector<float> vals=vm["obj-pos"].as<std::vector<float> >();
+         std::vector<float> vals=vm["rob-pos"].as<std::vector<float> >();
         
          if (vals.size()!=3)
          {
              PRINTERROR("Must specify 3 values for --obj-pos: x, y and z (specified "<<vals.size()<<")");
              PRINTMSG(desc);
          }
-        PRINTMSG("Using initial object pose "<<vals[0]<<", "<<vals[1]<<", "<<vals[2]);
+        PRINTMSG("Using initial robot pose "<<vals[0]<<", "<<vals[1]<<", "<<vals[2]);
         objPos=Eigen::Vector3d(vals[0],vals[1],vals[2]);
     }
 
@@ -291,6 +293,7 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
     if (vm.count("save-separate"))
     {
         saveSeparate=true;
+        PRINTMSG("Saving object and robot seperately");
     }
 
     if (vm.count("keep"))
@@ -308,11 +311,13 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
     if (vm.count("save-prefix"))
     {
         savePrefix = vm["save-prefix"].as<std::string>();
+        PRINTMSG("Saving to subfolder: " << savePrefix);
     }
     
     if (vm.count("autograsp"))
     {
         autoGrasp = true;
+        PRINTMSG("Finishing with autograsp");
     }
 
     if (vm.count("ocl-pos"))
@@ -381,8 +386,8 @@ int main(int argc, char **argv)
     // TODO parameterize:
     // Names for robot and object if not loaded from a world file.
     // If loaded from a world file, will be overwritten.
-    std::string useRobotName="Robot1";
-    std::string useObjectName="Object1";
+    std::string robotName="Robot1";
+    std::string objectName="Object1";
     
     if (!worldFilename.empty())
     {
@@ -410,9 +415,9 @@ int main(int argc, char **argv)
             PRINTERROR("Exactly 1 graspable object should have been loaded");
             return 1;
         }
-        useRobotName=robs.front();
-        useObjectName=objs.front();
-        PRINTMSG("Using robot "<<useRobotName<<" and object "<<useObjectName);
+        std::string robotName(robs.front());
+        std::string objectName(objs.front());
+        PRINTMSG("Using robot "<<robotName<<" and object "<<objectName);
     }
     else
     {
@@ -425,8 +430,6 @@ int main(int argc, char **argv)
         // objectTransform.translate(objPos);
         // We want to keep the object at the absolute origin
         robotTransform.translate(objPos);
-        std::string robotName(useRobotName); 
-        std::string objectName(useObjectName);
         
         if ((graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0) ||
                 (graspitMgr->loadObject(objectFilename, objectName, true, objectTransform)))
@@ -471,12 +474,13 @@ int main(int argc, char **argv)
 
     if (saveSeparate)
     {
-        graspitMgr->saveRobotAsInventor(outputDirectory + "/"+ savePrefix +"/robotStartpose.iv", useRobotName, createDir, forceWrite);
-        graspitMgr->saveObjectAsInventor(outputDirectory + "/"+ savePrefix + "/object.iv", useObjectName, createDir, forceWrite);
+        graspitMgr->saveRobotAsInventor(outputDirectory + "/"+ savePrefix +"/robotStartpose.iv", robotName, createDir, forceWrite);
+        graspitMgr->saveObjectAsInventor(outputDirectory + "/"+ savePrefix + "/object.iv", objectName, createDir, forceWrite);
        // graspitMgr->saveObjectAsInventor(outputDirectory + "/"+ savePrefix + "/object_oc.iv", useOccluderName, createDir, forceWrite);
     }
 
     PRINTMSG("Checking for planner config")
+    std::map<std::string, double> annealMap;
     if (!annealParams.empty())
     {
         PRINTMSG("Planner config found, configurating planner")
@@ -491,7 +495,6 @@ int main(int argc, char **argv)
         keys.push_back("DEF_K0");
 
         PRINTMSG("Formatting planner config")
-        std::map<std::string, double> annealMap;
         for (size_t i = 0; i < keys.size(); ++i)
         {
             annealMap[keys[i]] = annealParams[i];
@@ -534,10 +537,8 @@ int main(int argc, char **argv)
     std::vector<GraspIt::EigenGraspResult> allGrasps;
     p->getResults(allGrasps);
 
-    std::string robotName(useRobotName);
-    std::string objectName(useObjectName);
 
-    std::list< Contact * > bodyContacts = cg->getGraspContacts();
+    std::list< Contact * > bodyContacts = cg->getGraspContacts(robotName, objectName);
 
     std::ofstream dFile((outputDirectory + "/" + savePrefix + "/data.txt").c_str());
 
@@ -548,19 +549,47 @@ int main(int argc, char **argv)
 
         if (dFile.is_open())
         {   
-            dFile << "Config:\t" << hexToStr(savePrefix.c_str()) << "\n";
-            int graspNumber = it - allGrasps.begin();
-            dFile << "Object\t" << objectName;
-            dFile << "Grasp\t" << graspNumber << "\n";
+            
+            dFile << "Object_start\n";
+            dFile << "file_name\t" << objectFilename << "\n"; 
+            dFile << "position\t" << "0.0, 0.0, 0.0" << "\n";
+            dFile << "Object_end\n";
+
+            dFile << "Robot_start\n" ;
+            dFile << "file_name\t" << robotFilename << "\n";
+            dFile << "position\t" << objPos << "\n";
+            dFile << "Robot_end\n";
+
+            // Write out the occluder position(s)
+            dFile << "Occluder_start" << "\n";
+            dFile << "file_name\t" << objectFilename << "\n";
+            dFile << "position\t" << vecToStr(oclPos) << "\n";
+            dFile << "Occluder_end\n";
+
+            // Write out the annealing parameters
+            if (!annealMap.empty())
+            { 
+                dFile << "Anneal_start\n";
+                for (std::map<std::string, double>::iterator itm=annealMap.begin(); 
+                     itm!=annealMap.end(); ++itm)
+                {
+                    dFile << itm->first << "=" << itm->second << '\n';
+                }   
+                dFile << "Anneal_end\n";
+            }
+            else
+            {
+                dFile << "Anneal_default\n";
+            }
+
+            // Write out the grasp generated data
             std::vector<double> dofs = it->getGraspJointDOFs();
             dFile << "DOFS\t" << vecToStr(dofs) <<"\n";
             dFile << "energy\t" << it->getEnergy() << "\n";
             dFile << "epsilon\t" << it->qualityEpsilon() << "\n";
             dFile << "hand_transform\t" << it->getObjectToHandTransform() << "\n";
 
-            dFile << "contacts_start\n";
-            dFile << "contacts_size\t" << bodyContacts.size() << "\n";
-
+            dFile << "Contacts_start\n";
             std::list<Contact *>::iterator itr;
             for(itr=bodyContacts.begin();itr != bodyContacts.end();++itr)
                 {
@@ -570,15 +599,12 @@ int main(int argc, char **argv)
                     // std::vector<double> normals = cg->getContactNorm(*itr);
                     // std::cout << "normals\t" << vecToStr(positions) <<"\n";
                 }
-            dFile << "contacts_end";
+            dFile << "Contacts_end";
         }
         else PRINTMSG("Unable to open data file");
     }
    
     dFile.close(); 
-  
-
-
-    PRINTMSG("Quitting program.");
-    //return 1;
+    PRINTMSG("Quitting grasp planner.");
+    
 }

@@ -13,6 +13,7 @@
 // grasp_planning_graspit
 #include <grasp_planning_graspit/GraspItSceneManager.h>
 #include <grasp_planning_graspit/GraspItAccessor.h>
+#include <grasp_planning_graspit/LogBinding.h>
 
 // graspit
 #include <robot.h>
@@ -39,8 +40,8 @@ namespace GraspIt
 		ContactGetter(const std::string& name, const SHARED_PTR<GraspItSceneManager>& interface);
 		virtual ~ContactGetter();
 
-		// std::list< Contact* > getGraspContacts(const std::string& robName, const std::string& objName);
-		std::list< Contact* > getGraspContacts();
+		std::list< Contact* > getGraspContacts(const std::string& robName, const std::string& objName);
+		// std::list< Contact* > getGraspContacts();
 
 		std::vector<double> getContactPos(Contact * c);
 		std::vector<double> getContactNorm(Contact * c);
@@ -54,27 +55,56 @@ namespace GraspIt
 
 	private:
 
-		Hand * getRobotHand()
+		Robot * getGraspRobot(const std::string& robName)
 		{
-			Hand * h = getCurrentHand();
-			return h;
+			if (tryLockWorld())
+			{
+				Robot *r = getRobot(robName);
+				unlockWorld();
+				PRINTMSG("The robot: " << r->getName().toLocal8Bit().constData()  << " was found");
+				if (!r)
+				{
+					PRINTERROR("Robot" << robName << " could not be found!");
+				}
+				return r;
+			}
+			else{PRINTERROR("Could not lock the world to retrieve the robot");}
+			
 		}
-		// Robot * getRobotHand(const std::string& name)
-		// {
-		// 	Robot * r = getRobot(name);
-		// 	return r;
-		// }
 
-		Body * getGraspBody()
+		GraspableBody * getGraspBody(const std::string& objName)
 		{
-			Body * b = getCurrentGraspableBody();
-			return b;
+			if (tryLockWorld())
+			{
+				GraspableBody *b = getGraspableBody(objName);
+				unlockWorld();
+				PRINTMSG("The body: " << b->getName().toLocal8Bit().constData()  << " was found");
+				if (!b)
+				{
+					PRINTERROR("Body" << objName << " could not be found!");
+				}
+				return b;
+			}
+			else{PRINTERROR("Could not lock the world to retrieve the body");}
 		}
-		Grasp * getHandGrasp(Hand * h)
+
+
+		std::list< Contact * > getContacts(Robot* r, GraspableBody * b)
 		{
-			Grasp * g = h->getGrasp();
-			return g;
+			if (tryLockWorld())
+			{
+				std::list< Contact * > c = r->getContacts(b);
+				unlockWorld();
+				if (c.empty())
+				{
+					PRINTMSG("No contacts returned for robot " << r->getName().toLocal8Bit().constData()
+					<< " and body " << b->getName().toLocal8Bit().constData())
+				}
+				return c;
+			}
+			else{PRINTERROR("Could not lock world during contact retrieval")}
 		}
+
 
 		position getContactLoc(Contact * c)
 		{

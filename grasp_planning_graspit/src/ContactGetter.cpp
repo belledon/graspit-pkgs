@@ -90,17 +90,13 @@ void ContactGetter::onSceneManagerShutdown()
 #endif
 }
 
-// std::list< Contact* > ContactGetter::getGraspContacts()
-// {
-// 	Hand * h = getRobotHand();
-// 	Body * b = getGraspBody();
-// 	return h->getContacts(b);
-// }
-std::list< Contact* > ContactGetter::getGraspContacts()
+std::list< Contact* > ContactGetter::getGraspContacts(const std::string& robName, const std::string& objName)
 {
-    Hand *h = getRobotHand();
-    Grasp *g = getHandGrasp(h);
-    int numContacts = g->getNumContacts();
+
+    Robot *r = getGraspRobot(robName);
+    GraspableBody *b = getGraspBody(objName);
+    std::list< Contact * > c = getContacts(r, b);
+    int numContacts = c.size();
     if (numContacts > 0)
     {
         char buffer [50];
@@ -112,14 +108,7 @@ std::list< Contact* > ContactGetter::getGraspContacts()
     {
         PRINTMSG("Did not find contacts for grasp");
     }
-
-    std::list< Contact* > cs;
-
-    for (int i = 0; i < numContacts; ++i)
-    {   
-        cs.push_back(g->getContact(i));
-    }
-    return cs;
+    return c;
 }
 
 std::vector<double> ContactGetter::getContactPos(Contact * c)
