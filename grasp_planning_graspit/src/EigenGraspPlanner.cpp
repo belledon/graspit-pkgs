@@ -82,7 +82,7 @@ EigenGraspPlanner::EigenGraspPlanner(const std::string& name, const SHARED_PTR<G
 EigenGraspPlanner::~EigenGraspPlanner()
 {
     PRINTMSG("EigenGrasp planner destructor");
-
+    PRINTMSG("Removing idle listeners");
     removeFromIdleListeners();
 
 #ifdef USE_SEPARATE_SOSENSOR
@@ -92,8 +92,10 @@ EigenGraspPlanner::~EigenGraspPlanner()
     {
         if (mIdleSensor->isScheduled())
         {
+            PRINTMSG("Unscheduling sensor");
             mIdleSensor->unschedule();
         }
+        PRINTMSG("Deleting sensor");
         delete mIdleSensor;
         mIdleSensor = NULL;
     }
@@ -102,6 +104,7 @@ EigenGraspPlanner::~EigenGraspPlanner()
     graspitEgPlannerMtx.lock();
     if (graspitEgPlanner)
     {
+        PRINTMSG("Deleting planner");
         delete graspitEgPlanner;
         graspitEgPlanner = NULL;
     }
@@ -112,7 +115,7 @@ EigenGraspPlanner::~EigenGraspPlanner()
     //     delete planningParams;
     //     planningParams = NULL;
     // }
-
+    PRINTMSG("Deleting results");
     deleteResults();
 
     // if (mEnergyCalculator) delete mEnergyCalculator;

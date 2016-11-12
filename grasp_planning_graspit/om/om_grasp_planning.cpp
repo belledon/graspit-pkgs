@@ -606,5 +606,6 @@ int main(int argc, char **argv)
    
     dFile.close(); 
     PRINTMSG("Quitting grasp planner.");
+    return 1;
     
 }
