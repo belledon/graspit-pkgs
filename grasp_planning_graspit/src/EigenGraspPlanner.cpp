@@ -683,15 +683,23 @@ bool EigenGraspPlanner::saveResultsAsWorldFiles(const std::string& inDirectory,
             PRINTERROR("GraspIt could not save world file " << i);
             return false;
         }
-        if (asInventor && !getGraspItSceneManager()->saveInventorWorld(wFilename + ".iv", createDir))
-        {
-            PRINTERROR("GraspIt could not save world file " << i);
-            return false;
-        }
+        
         bool forceWrite = createDir;  // only enforce if creating dir is also allowed
-        if (saveSeparatePoseIV && !getGraspItSceneManager()->saveRobotAsInventor(wFilename + "_pose.iv", robotName, createDir, forceWrite))
+        if (saveSeparatePoseIV)
         {
-            PRINTERROR("GraspIt could not save robot pose file " << i);
+            
+            if (saveSeparatePoseIV && !getGraspItSceneManager()->saveRobotAsInventor(wFilename + "_pose.iv", robotName, createDir, forceWrite))
+            {
+                PRINTERROR("GraspIt could not save robot pose file " << i);
+            }
+        }
+        else
+        {
+            if (asInventor && !getGraspItSceneManager()->saveInventorWorld(wFilename + ".iv", createDir))
+            {
+                PRINTERROR("GraspIt could not save world file " << i);
+                return false;
+            }   
         }
     }
     return true;

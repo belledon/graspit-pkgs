@@ -143,8 +143,8 @@ std::string hexToStr(std::string h)
     return newString;
 }
 bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string& robotFilename,
-                std::string& objectFilename, std::string& outputDirectory, bool& saveSeparate, Eigen::Vector3d& objPos, 
-                std::vector<double>& annealParams, int& maxPlanningSteps, int& keepMaxPlanningResults, 
+                std::string& objectFilename, std::string& outputDirectory, bool& saveSeparate, Eigen::Vector3d& robPos, 
+                Eigen::Quaterniond& robRot, std::vector<double>& annealParams, int& maxPlanningSteps, int& keepMaxPlanningResults, 
                 std::string& savePrefix, bool& autoGrasp, std::vector<float>& oclPos, bool& makeOcl)
 {
     autoGrasp = false;
@@ -268,12 +268,25 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
         
          if (vals.size()!=3)
          {
-             PRINTERROR("Must specify 3 values for --obj-pos: x, y and z (specified "<<vals.size()<<")");
+             PRINTERROR("Must specify 3 values for --rob-pos: x, y and z (specified "<<vals.size()<<")");
              PRINTMSG(desc);
          }
         PRINTMSG("Using initial robot pose "<<vals[0]<<", "<<vals[1]<<", "<<vals[2]);
-        objPos=Eigen::Vector3d(vals[0],vals[1],vals[2]);
+        robPos=Eigen::Vector3d(vals[0],vals[1],vals[2]);
     }
+    if (vm.count("rob-rot"))
+    {
+         std::vector<float> vals=vm["rob-rot"].as<std::vector<float> >();
+        
+         if (vals.size()!=4)
+         {
+             PRINTERROR("Must specify 4 values for --rob-pos: w, x, y, and z (specified "<<vals.size()<<")");
+             PRINTMSG(desc);
+         }
+        PRINTMSG("Using initial robot rotation "<<vals[0]<<", "<<vals[1]<<", "<<vals[2]<<", "<<vals[3]);
+        robRot=Eigen::Quaterniond(vals[0],vals[1],vals[2], vals[3]);
+    }
+
 
     if (vm.count("anneal"))
     {
@@ -325,7 +338,7 @@ bool loadParams(int argc, char ** argv, std::string& worldFilename, std::string&
         std::vector<float> vals=vm["ocl-pos"].as<std::vector<float> >();
         if (vals.size()==0)
         {
-            PRINTERROR("Must specify 3n ((int)n > 0) values for --ocl-pos: x, y and z (specified "<<vals.size()<<")");
+            PRINTERROR("Must specify 3*n (n > 0) values for --ocl-pos: x, y and z (specified "<<vals.size()<<")");
             PRINTMSG(desc);
         }
         oclPos = vals;
@@ -349,7 +362,8 @@ int main(int argc, char **argv)
     std::string outputDirectory;
     bool saveSeparate;
     bool autoGrasp;
-    Eigen::Vector3d objPos;
+    Eigen::Vector3d robPos;
+    Eigen::Quaterniond robRot;
     bool makeOcl;
     std::vector<float> oclPos;
     int maxPlanningSteps = 50000;
@@ -358,7 +372,7 @@ int main(int argc, char **argv)
     std::vector<double> annealParams;
    
 
-    if (!loadParams(argc, argv, worldFilename, robotFilename, objectFilename, outputDirectory, saveSeparate, objPos,
+    if (!loadParams(argc, argv, worldFilename, robotFilename, objectFilename, outputDirectory, saveSeparate, robPos, robRot,
         annealParams, maxPlanningSteps, keepMaxPlanningResults, savePrefix, autoGrasp, oclPos, makeOcl))
     {
         PRINTERROR("Could not read arguments");
@@ -427,14 +441,20 @@ int main(int argc, char **argv)
         GraspIt::EigenTransform objectTransform;
         robotTransform.setIdentity();
         objectTransform.setIdentity();
-        // objectTransform.translate(objPos);
         // We want to keep the object at the absolute origin
-        robotTransform.translate(objPos);
+        robotTransform.translate(robPos);
+        robotTransform.rotate(robRot);
         
-        if ((graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0) ||
-                (graspitMgr->loadObject(objectFilename, objectName, true, objectTransform)))
+        if (graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0)
         {
-            PRINTERROR("Could not load robot or object");
+            PRINTERROR("Could not load robot");
+            return 1;
+        }
+
+
+        if (graspitMgr->loadObject(objectFilename, objectName, true, objectTransform))
+        {
+            PRINTERROR("Could not load object");
             return 1;
         }
  
@@ -557,7 +577,8 @@ int main(int argc, char **argv)
 
             dFile << "Robot_start\n" ;
             dFile << "file_name\t" << robotFilename << "\n";
-            dFile << "position\t" << objPos << "\n";
+            dFile << "position\t" << robPos << "\n";
+            dFile << "rotation\t" << robRot << "\n";
             dFile << "Robot_end\n";
 
             // Write out the occluder position(s)
