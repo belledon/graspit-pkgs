@@ -492,7 +492,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        double * dofs = 0;
+        double * dofs;
     }
 
 
