@@ -485,18 +485,14 @@ int main(int argc, char **argv)
     }
     
     Hand * currentHand = graspitMgr->getCurrentHand();
+    double * dofs;
     if (currentHand->autoGrasp(false))
     {
-        double * dofs;
+        
         currentHand->getDOFVals(dofs);
     }
-    else
-    {
-        double * dofs;
-    }
+ 
 
-
-    
     bool createDir = true;
     bool saveIV = true;
     bool forceWrite = createDir;  // only enforce if creating dir is also allowed
