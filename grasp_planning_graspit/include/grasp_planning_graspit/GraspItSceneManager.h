@@ -321,6 +321,18 @@ public:
      */
     bool isObjectLoaded(const std::string& name) const;
 
+     /**
+     * Returns the hand currently loaded as main hand in the world.
+     * This method has to be handled with care, as it can break thread safety. The current hand is
+     * part of the current world, and this pointer is returned. If the world changes, this pointer
+     * is not valid any more.
+     * To lock the world, subclasses or friend classes can use tryLockWorld(), lockWorld() and
+     * unlockWorld(). To avoid concurrency issues, this should be used before this method is called.
+     * However keep in mind that other threads trying to access the world will be unable to do so
+     * while the lock is held.
+     */
+    Hand * getCurrentHand();
+
 protected:
     /**
      * This method is supposed to initialize the Core instance (field core).
@@ -432,17 +444,7 @@ protected:
         return UNIQUE_RECURSIVE_LOCK(graspitWorldMtx);
     }
 
-    /**
-     * Returns the hand currently loaded as main hand in the world.
-     * This method has to be handled with care, as it can break thread safety. The current hand is
-     * part of the current world, and this pointer is returned. If the world changes, this pointer
-     * is not valid any more.
-     * To lock the world, subclasses or friend classes can use tryLockWorld(), lockWorld() and
-     * unlockWorld(). To avoid concurrency issues, this should be used before this method is called.
-     * However keep in mind that other threads trying to access the world will be unable to do so
-     * while the lock is held.
-     */
-    Hand * getCurrentHand();
+   
 
     /**
      * Returns the hand currently loaded as main hand in the world.
