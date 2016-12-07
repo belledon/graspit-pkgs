@@ -488,7 +488,11 @@ int main(int argc, char **argv)
     if (currentHand->autoGrasp(false))
     {
         double * dofs;
-        currentHand->getDOFVals(dofs)
+        currentHand->getDOFVals(dofs);
+    }
+    else
+    {
+        double * dofs = 0;
     }
 
 
@@ -533,22 +537,6 @@ int main(int argc, char **argv)
         dFile << "file_name\t" << objectFilename << "\n";
         dFile << "position\t" << vecToStr(oclPos) << "\n";
         dFile << "Occluder_end\n";
-
-        // Write out the annealing parameters
-        if (!annealMap.empty())
-        { 
-            dFile << "Anneal_start\n";
-            for (std::map<std::string, double>::iterator itm=annealMap.begin(); 
-                 itm!=annealMap.end(); ++itm)
-            {
-                dFile << itm->first << "=" << itm->second << '\n';
-            }   
-            dFile << "Anneal_end\n";
-        }
-        else
-        {
-            dFile << "Anneal_default\n";
-        }
 
         // Write out the grasp generated data
         // std::vector<double> dofs = it->getGraspJointDOFs();
