@@ -90,6 +90,23 @@ namespace GraspIt
 			else{PRINTERROR("Could not lock the world to retrieve the body");}
 		}
 
+		Hand * getCurrentHand()
+		{
+			if (tryLockWorld())
+			{
+				Hand *h = getCurrentHand();
+				unlockWorld();
+				
+				if (!h)
+				{
+					PRINTERROR("Current hand could not be found!");
+				}
+				return h;
+			}
+			else{PRINTERROR("Could not lock the world to retrieve the current hand");}
+			
+		}
+		
 
 		std::list< Contact * > getContacts(Robot* r, GraspableBody * b)
 		{

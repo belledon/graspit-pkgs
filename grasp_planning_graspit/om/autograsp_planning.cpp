@@ -485,7 +485,7 @@ int main(int argc, char **argv)
     }
     
 
-    double * dofs = cg->autoGrasp(robotName);
+    double * dofs = cg->autoGrasp();
  
 
     bool createDir = true;

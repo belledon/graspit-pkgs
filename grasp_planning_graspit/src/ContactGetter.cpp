@@ -90,10 +90,12 @@ void ContactGetter::onSceneManagerShutdown()
 #endif
 }
 
-double* ContactGetter::autoGrasp(const std::string& robName){
+double* ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
-    Hand *h = getGraspRobot(robName);
-    PRINTMSG("Getting hand dofs")
+    Hand *h = getCurrentHand();
+    PRINTMSG("Performing autograsp");
+    h->autograsp(false);
+    PRINTMSG("Getting hand dofs");
     double *dofs;
     h->getDOFVals(dofs);
     return dofs;
