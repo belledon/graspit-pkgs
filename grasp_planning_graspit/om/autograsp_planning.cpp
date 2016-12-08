@@ -484,11 +484,12 @@ int main(int argc, char **argv)
         }  
     }
     
+    PRINTMSG("Getting hand");
     Hand * currentHand = graspitMgr->getCurrentHand();
     double * dofs;
     if (currentHand->autoGrasp(false))
     {
-        
+        PRINTMSG("Getting hand dofs");
         currentHand->getDOFVals(dofs);
     }
  
