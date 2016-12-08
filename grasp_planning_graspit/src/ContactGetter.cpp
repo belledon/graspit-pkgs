@@ -94,7 +94,7 @@ double* ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
     Hand *h = getCurrentHand();
     PRINTMSG("Performing autograsp");
-    h->autograsp(false);
+    h->autoGrasp(false);
     PRINTMSG("Getting hand dofs");
     double *dofs;
     h->getDOFVals(dofs);
