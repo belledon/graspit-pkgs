@@ -65,7 +65,7 @@ if (NOT COMPILE_WITH_CATKIN OR BUILD_GRASPIT)
     find_package(Eigen3 REQUIRED)
 endif (NOT COMPILE_WITH_CATKIN OR BUILD_GRASPIT)
 
-find_package(Boost REQUIRED COMPONENTS filesystem system thread program_options)
+find_package(Boost REQUIRED COMPONENTS filesystem system thread program_options python)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -243,6 +243,7 @@ set(ALL_INCLUDE_DIRECTORIES
   ${Boost_INCLUDE_DIRS}
   ${graspit_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
+
 )
 
 add_definitions(
@@ -255,7 +256,7 @@ add_definitions(
 include_directories(
   ${ALL_INCLUDE_DIRECTORIES}
 )
-
+INCLUDE_DIRECTORIES("${Boost_INCLUDE_DIRS}" "/usr/include/python3.5")
 set (INCDIR include/${PROJECT_NAME})
 set(MAIN_HEADER_FILES
     ${INCDIR}/GraspItSceneManager.h
