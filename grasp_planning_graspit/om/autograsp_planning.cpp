@@ -17,7 +17,7 @@
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
 
 #include <pybind11/pybind11.h>
-
+#include <pybind11/eigen.h>
 #include <grasp_planning_graspit/GraspItSceneManagerHeadless.h>
 // #include <grasp_planning_graspit/LogBinding.h>
 #include <grasp_planning_graspit/ContactGetter.h>
