@@ -90,17 +90,36 @@ void ContactGetter::onSceneManagerShutdown()
 #endif
 }
 
-double* ContactGetter::autoGrasp(){
+std::vector<double>& ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
     Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Performing autograsp");
-    h->autoGrasp(false);
-    std::string robotName="Robot1";
-    Robot *r = getGraspItSceneManager()->getRobot(robotName);
+    GraspPlanningState s = GraspPlanningState(h);
+    if (!s.getHand()->autoGrasp(false))
+    {
+        PRINTWARN("Could not correctly open hand with auto-grasp, the pre-grasp state may not be ideal.");
+    }
+    
+    const PostureState* handPosture = s->readPosture();
+    if (!handPosture)
+    {
+        PRINTERROR("Posture is NULL!");
+        return;
+    }
+
+    // std::string robotName="Robot1";
+    // Robot *r = getGraspItSceneManager()->getRobot(robotName);
     // h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Getting hand dofs");
-    double *dofs;
-    r->getDOFVals(dofs);
+    const int numDOF = s->getHand()->getNumDOF();
+    double * _dofs = new double[numDOF];
+    handPosture->getHandDOF(_dofs);
+    std::vector<double>& dofs;
+    for (int k = 0; k < numDOF; ++k)
+    {
+        dofs.push_back(_dofs[k]);
+    }
+    // r->getDOFVals(dofs);
     PRINTMSG("Obtained hand dofs");
     return dofs;
 }

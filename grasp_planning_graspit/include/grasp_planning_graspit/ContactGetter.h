@@ -46,7 +46,7 @@ namespace GraspIt
 		std::vector<double> getContactPos(Contact * c);
 		std::vector<double> getContactNorm(Contact * c);
 
-		double* autoGrasp();
+		std::vector<double>& autoGrasp();
 
 	protected:
 
