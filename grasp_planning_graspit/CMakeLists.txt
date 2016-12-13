@@ -324,7 +324,7 @@ endif (COMPILE_WITH_CATKIN)
 # At least one of the variables must be non-empty at this point.
 set (DEPEND_LIBRARIES ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${graspit_LIBRARIES} ${DEPEND_LIBRARIES})
 
-add_executable(autograsp_planning om/autograsp_planning.cpp)
+#add_executable(autograsp_planning om/autograsp_planning.cpp)
 target_link_libraries(autograsp_planning
     PRIVATE
     ${DEPEND_LIBRARIES}
