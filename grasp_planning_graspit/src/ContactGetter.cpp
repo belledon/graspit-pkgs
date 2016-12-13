@@ -4,7 +4,7 @@
 #include <grasp_planning_graspit/LogBinding.h>
 #include <grasp_planning_graspit/PrintHelpers.h>
 #include <grasp_planning_graspit/GraspItHelpers.h>
-#include <searchState.h>
+#include <EGPlanner/searchState.h>
 
 #include <Inventor/Qt/SoQt.h>
 #include <Inventor/actions/SoWriteAction.h>
