@@ -462,7 +462,7 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 endif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 
 add_subdirectory(pybind11)
-pybind11_add_module(autograsp_planning om/autograsp_planning.cpp ${INCDIR}/LogBinding.h)
+pybind11_add_module(autograsp_planning om/autograsp_planning.cpp include/grasp_planning_graspit/LogBinding.h)
 
 #############
 ## Testing ##
