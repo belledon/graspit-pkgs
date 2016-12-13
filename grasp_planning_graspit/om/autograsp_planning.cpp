@@ -43,7 +43,7 @@ double * quickGrasp(
     Eigen::Vector3d& robPos, 
     const std::vector<double>& robRot)
 {
-    // PRINTMSG("Initializing GraspIt")
+    PRINTMSG("Initializing GraspIt")
     SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
     SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("ContactGetter", graspitMgr));
     GraspIt::EigenTransform robotTransform;
@@ -63,13 +63,13 @@ double * quickGrasp(
 
     if (graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0)
     {
-        // PRINTERROR("Could not load robot");
+        PRINTERROR("Could not load robot");
         
     }
 
     if (graspitMgr->loadObject(objectFilename, objectName, true, objectTransform))
     {
-        // PRINTERROR("Could not load object");
+        PRINTERROR("Could not load object");
     }
     
     double * dofs = cg->autoGrasp();
