@@ -308,7 +308,7 @@ endif (BUILD_GRASPIT)
 ## Declare C++ executables
 add_executable(grasp_planning src/grasp_planning.cpp)
 add_executable(om_grasp_planning om/om_grasp_planning.cpp)
-#add_executable(autograsp_planning om/autograsp_planning.cpp)
+add_executable(autograsp_planning om/autograsp_planning.cpp)
 add_executable(simple_graspit_database test/simple_graspit_database.cpp)
 add_executable(simple_planning_tutorial tutorial/src/simple_planning_tutorial.cpp)
 
