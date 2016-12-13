@@ -308,7 +308,7 @@ endif (BUILD_GRASPIT)
 ## Declare C++ executables
 add_executable(grasp_planning src/grasp_planning.cpp)
 add_executable(om_grasp_planning om/om_grasp_planning.cpp)
-add_executable(autograsp_planning om/autograsp_planning.cpp)
+#add_executable(autograsp_planning om/autograsp_planning.cpp)
 add_executable(simple_graspit_database test/simple_graspit_database.cpp)
 add_executable(simple_planning_tutorial tutorial/src/simple_planning_tutorial.cpp)
 
@@ -340,10 +340,10 @@ target_link_libraries(om_grasp_planning
     ${DEPEND_LIBRARIES}
 )
 
-target_link_libraries(autograsp_planning
-    #grasp_planning_graspit
-    ${DEPEND_LIBRARIES}
-)
+# target_link_libraries(autograsp_planning
+#     grasp_planning_graspit
+#     ${DEPEND_LIBRARIES}
+# )
 
 target_link_libraries(simple_planning_tutorial
   grasp_planning_graspit
@@ -462,7 +462,7 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 endif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 
 add_subdirectory(pybind11)
-pybind11_add_module(autograsp_planning om/autograsp_planning.cpp)
+pybind11_add_module(autograsp_planning om/autograsp_planning.cpp ${DEPEND_LIBRARIES})
 # target_link_libraries(include/grasp_planning_graspit/LogBinding.h
 #     include/grasp_planning_graspit/GraspItSceneManagerHeadless.h
 #     include/grasp_planning_graspit/ContactGetter.h)
