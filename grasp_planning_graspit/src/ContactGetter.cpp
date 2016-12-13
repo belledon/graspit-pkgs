@@ -98,7 +98,7 @@ double* ContactGetter::autoGrasp(){
     // std::string robotName="Robot1";
     // Robot *r = getGraspItSceneManager()->getRobot(robotName);
     delete h;
-    Hand *h = getGraspItSceneManager()->getCurrentHand();
+    h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Getting hand dofs");
     double *dofs;
     h->getDOFVals(dofs);
