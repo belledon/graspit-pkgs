@@ -459,9 +459,9 @@ pybind11_add_module(autograsp_planning om/autograsp_planning.cpp)
 target_link_libraries(autograsp_planning PRIVATE grasp_planning_graspit)
 install(TARGETS autograsp_planning
     EXPORT autograsp_planning-targets
-    ARCHIVE DESTINATION ${BIN_DESTINATION}
-    LIBRARY DESTINATION ${BIN_DESTINATION}
-    RUNTIME DESTINATION ${BIN_DESTINATION}
+    ARCHIVE DESTINATION ${INCLUDE_DESTINATION}
+    LIBRARY DESTINATION ${INCLUDE_DESTINATION}
+    RUNTIME DESTINATION ${INCLUDE_DESTINATION}
 )
 # target_link_libraries(autograsp_planning PRIVATE ${DEPEND_LIBRARIES})
 
