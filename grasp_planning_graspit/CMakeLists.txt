@@ -308,7 +308,7 @@ endif (BUILD_GRASPIT)
 ## Declare C++ executables
 add_executable(grasp_planning src/grasp_planning.cpp)
 add_executable(om_grasp_planning om/om_grasp_planning.cpp)
-#add_executable(autograsp_planning om/autograsp_planning.cpp)
+add_executable(autograsp_planning om/autograsp_planning.cpp)
 add_executable(simple_graspit_database test/simple_graspit_database.cpp)
 add_executable(simple_planning_tutorial tutorial/src/simple_planning_tutorial.cpp)
 
@@ -461,7 +461,7 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
     )
 endif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 
-target_link_libraries(autograsp_planning PRIVATE ${DEPEND_LIBRARIES})
+# target_link_libraries(autograsp_planning PRIVATE ${DEPEND_LIBRARIES})
 add_subdirectory(pybind11)
 pybind11_add_module(autograsp_planning om/autograsp_planning.cpp)
 # target_link_libraries(include/grasp_planning_graspit/LogBinding.h
