@@ -94,7 +94,7 @@ std::vector<double>& ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
     Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Performing autograsp");
-    GraspPlanningState s = GraspPlanningState(h);
+    const GraspPlanningState s = GraspPlanningState(h);
     if (!s.getHand()->autoGrasp(false))
     {
         PRINTWARN("Could not correctly open hand with auto-grasp, the pre-grasp state may not be ideal.");
@@ -104,7 +104,6 @@ std::vector<double>& ContactGetter::autoGrasp(){
     if (!handPosture)
     {
         PRINTERROR("Posture is NULL!");
-        return;
     }
 
     // std::string robotName="Robot1";
