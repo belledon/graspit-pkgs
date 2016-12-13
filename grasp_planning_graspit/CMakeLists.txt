@@ -324,13 +324,6 @@ endif (COMPILE_WITH_CATKIN)
 # At least one of the variables must be non-empty at this point.
 set (DEPEND_LIBRARIES ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${graspit_LIBRARIES} ${DEPEND_LIBRARIES})
 
-add_executable(autograsp_planning EXCLUDE_FROM_ALL om/autograsp_planning.cpp)
-target_link_libraries(${target_name} PRIVATE grasp_planning_graspit})
-target_link_libraries(autograsp_planning PRIVATE ${DEPEND_LIBRARIES})
-add_subdirectory(pybind11)
-pybind11_add_module(autograsp_planning om/autograsp_planning.cpp)
-
-
 ## Specify libraries to link a library or executable target against
 
 target_link_libraries(grasp_planning_graspit
@@ -465,6 +458,10 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 endif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 
 
+
+add_subdirectory(pybind11)
+pybind11_add_module(autograsp_planning om/autograsp_planning.cpp)
+target_link_libraries(autograsp_planning PRIVATE ${DEPEND_LIBRARIES})
 
 # target_link_libraries(include/grasp_planning_graspit/LogBinding.h
 #     include/grasp_planning_graspit/GraspItSceneManagerHeadless.h
