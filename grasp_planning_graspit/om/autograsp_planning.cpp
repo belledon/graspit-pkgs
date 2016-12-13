@@ -19,7 +19,7 @@
 #include <pybind11/pybind11.h>
 
 #include <grasp_planning_graspit/GraspItSceneManagerHeadless.h>
-#include <grasp_planning_graspit/LogBinding.h>
+// #include <grasp_planning_graspit/LogBinding.h>
 #include <grasp_planning_graspit/ContactGetter.h>
 
 #include <string>
@@ -41,7 +41,7 @@ double * quickGrasp(
     Eigen::Vector3d& robPos, 
     Eigen::Quaterniond& robRot)
 {
-    PRINTMSG("Initializing GraspIt")
+    // PRINTMSG("Initializing GraspIt")
     SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
     SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("ContactGetter", graspitMgr));
     GraspIt::EigenTransform robotTransform;
@@ -57,13 +57,13 @@ double * quickGrasp(
 
     if (graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0)
     {
-        PRINTERROR("Could not load robot");
+        // PRINTERROR("Could not load robot");
         
     }
 
     if (graspitMgr->loadObject(objectFilename, objectName, true, objectTransform))
     {
-        PRINTERROR("Could not load object");
+        // PRINTERROR("Could not load object");
     }
     
     double * dofs = cg->autoGrasp();
