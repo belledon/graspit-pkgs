@@ -39,7 +39,7 @@ double * quickGrasp(
     std::string& objectFilename, 
     std::string& robotFilename,
     Eigen::Vector3d& robPos, 
-    std::vector<double* > robRot)
+    Eigen::Quaterniond& robRot)
 {
     // PRINTMSG("Initializing GraspIt")
     SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
@@ -51,9 +51,9 @@ double * quickGrasp(
     objectTransform.setIdentity();
     robotTransform.translate(robPos);
     // Have to do this because Eigen::Quaternion isn't covered by pybind/eigen
-    Eigen::Quaternion robRotQ(robRot[0], robRot[1], robRot[2])
+    // Eigen::Quaterniond robRotQ(robRot[0], robRot[1], robRot[2])
 
-    robotTransform.rotate(robRotQ);
+    robotTransform.rotate(robRot);
     
     std::string robotName="Robot1";
     std::string objectName="Object1";
