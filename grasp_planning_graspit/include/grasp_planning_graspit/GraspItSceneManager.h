@@ -333,6 +333,20 @@ public:
      */
     Hand * getCurrentHand();
 
+    /**
+     * Returns the robot with this name in the currently loaded world.
+     * This method has to be handled with care, as it can break thread safety. The robot is
+     * part of the current world, and this pointer is returned. If the world is changed while operations
+     * on this pointer are made, this pointer may get invalidated.
+     * To lock the world, subclasses or friend classes can use tryLockWorld(), lockWorld() and
+     * unlockWorld(). To avoid concurrency issues, this should be used before this method is called.
+     * However keep in mind that other threads trying to access the world will be unable to do so
+     * while the lock is held.
+     * \param name name of the robot to get.
+     * \return NULL if robots cannot be retrieved at this stage, or there is no such robot. Otherwise the pointer
+     */
+    Robot * getRobot(const std::string& name);
+
 protected:
     /**
      * This method is supposed to initialize the Core instance (field core).
@@ -486,19 +500,7 @@ protected:
 
 
 
-    /**
-     * Returns the robot with this name in the currently loaded world.
-     * This method has to be handled with care, as it can break thread safety. The robot is
-     * part of the current world, and this pointer is returned. If the world is changed while operations
-     * on this pointer are made, this pointer may get invalidated.
-     * To lock the world, subclasses or friend classes can use tryLockWorld(), lockWorld() and
-     * unlockWorld(). To avoid concurrency issues, this should be used before this method is called.
-     * However keep in mind that other threads trying to access the world will be unable to do so
-     * while the lock is held.
-     * \param name name of the robot to get.
-     * \return NULL if robots cannot be retrieved at this stage, or there is no such robot. Otherwise the pointer
-     */
-    Robot * getRobot(const std::string& name);
+    
 
     const Robot * readRobot(const std::string& name) const;
 
