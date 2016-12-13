@@ -340,10 +340,10 @@ target_link_libraries(om_grasp_planning
     ${DEPEND_LIBRARIES}
 )
 
-# target_link_libraries(autograsp_planning
-#     grasp_planning_graspit
-#     ${DEPEND_LIBRARIES}
-# )
+target_link_libraries(autograsp_planning
+    grasp_planning_graspit
+    ${DEPEND_LIBRARIES}
+)
 
 target_link_libraries(simple_planning_tutorial
   grasp_planning_graspit
@@ -462,11 +462,10 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 endif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 
 add_subdirectory(pybind11)
-pybind11_add_module(autograsp_planning 
-    om/autograsp_planning.cpp 
-    include/grasp_planning_graspit/LogBinding.h
-    include/grasp_planning_graspit/GraspItSceneManagerHeadless.h
-    include/grasp_planning_graspit/ContactGetter.h)
+pybind11_add_module(autograsp_planning om/autograsp_planning.cpp)
+# target_link_libraries(include/grasp_planning_graspit/LogBinding.h
+#     include/grasp_planning_graspit/GraspItSceneManagerHeadless.h
+#     include/grasp_planning_graspit/ContactGetter.h)
 
 #############
 ## Testing ##
