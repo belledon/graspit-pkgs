@@ -51,9 +51,9 @@ double * quickGrasp(
     objectTransform.setIdentity();
     robotTransform.translate(robPos);
     // Have to do this because Eigen::Quaternion isn't covered by pybind/eigen
-    Eigen::Quaterniond robRotQ(robRot[0], robRot[1], robRot[2])
-
-    robotTransform.rotate(robRot);
+    Eigen::Quaterniond robRotQ(robRot[0], robRot[1], robRot[2]);
+    robotTransform.rotate(robRotQ);
+    // robotTransform.rotate(robRot);
     
     std::string robotName="Robot1";
     std::string objectName="Object1";
