@@ -461,8 +461,9 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
     )
 endif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 
+target_link_libraries(autograsp_planning PRIVATE ${DEPEND_LIBRARIES})
 add_subdirectory(pybind11)
-pybind11_add_module(grasp_planning_graspit om/autograsp_planning.cpp ${DEPEND_LIBRARIES})
+pybind11_add_module(autograsp_planning om/autograsp_planning.cpp)
 # target_link_libraries(include/grasp_planning_graspit/LogBinding.h
 #     include/grasp_planning_graspit/GraspItSceneManagerHeadless.h
 #     include/grasp_planning_graspit/ContactGetter.h)
