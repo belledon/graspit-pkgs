@@ -394,12 +394,7 @@ install(TARGETS om_grasp_planning
     LIBRARY DESTINATION ${BIN_DESTINATION}
     RUNTIME DESTINATION ${BIN_DESTINATION}
 )
-# install(TARGETS autograsp_planning
-#     EXPORT autograsp_planning-targets
-#     ARCHIVE DESTINATION ${BIN_DESTINATION}
-#     LIBRARY DESTINATION ${BIN_DESTINATION}
-#     RUNTIME DESTINATION ${BIN_DESTINATION}
-# )
+
 install(EXPORT grasp_planning_graspit-targets
     DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
 )
@@ -462,6 +457,12 @@ endif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 add_subdirectory(pybind11)
 pybind11_add_module(autograsp_planning om/autograsp_planning.cpp)
 target_link_libraries(autograsp_planning PRIVATE grasp_planning_graspit)
+install(TARGETS autograsp_planning
+    EXPORT autograsp_planning-targets
+    ARCHIVE DESTINATION ${BIN_DESTINATION}
+    LIBRARY DESTINATION ${BIN_DESTINATION}
+    RUNTIME DESTINATION ${BIN_DESTINATION}
+)
 # target_link_libraries(autograsp_planning PRIVATE ${DEPEND_LIBRARIES})
 
 # target_link_libraries(include/grasp_planning_graspit/LogBinding.h
