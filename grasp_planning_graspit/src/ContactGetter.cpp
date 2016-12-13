@@ -92,7 +92,7 @@ void ContactGetter::onSceneManagerShutdown()
 
 double* ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
-    Hand *h = getGraspItSceneManager->getCurrentHand();
+    Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Performing autograsp");
     h->autoGrasp(false);
     PRINTMSG("Getting hand dofs");
