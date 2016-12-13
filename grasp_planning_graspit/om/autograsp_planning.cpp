@@ -16,7 +16,7 @@
 */
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
 
-#include <boost/python.hpp>
+#include <pybind11/pybind11.h>
 
 #include <grasp_planning_graspit/GraspItSceneManagerHeadless.h>
 #include <grasp_planning_graspit/LogBinding.h>
@@ -70,13 +70,24 @@ double * quickGrasp(
     return dofs;
 }
 
-/*
- * This is a macro Boost.Python provides to signify a Python extension module.
- */
-BOOST_PYTHON_MODULE(autograsp_planning) {
-    // An established convention for using boost.python.
-    using namespace boost::python;
+namespace py = pybind11;
 
-    // Expose the function.
-    def("quickGrasp", quickGrasp);
+PYBIND11_PLUGIN(autograsp_planning) {
+    py::module m("autograsp_planning", "Graspit!-quickGrasp plugin");
+
+    m.def("quickGrasp", &quickGrasp, "Performs Graspit!-autograsp");
+
+    return m.ptr();
 }
+
+
+// /*
+//  * This is a macro Boost.Python provides to signify a Python extension module.
+//  */
+// BOOST_PYTHON_MODULE(autograsp_planning) {
+//     // An established convention for using boost.python.
+//     using namespace boost::python;
+
+//     // Expose the function.
+//     def("quickGrasp", quickGrasp);
+// }

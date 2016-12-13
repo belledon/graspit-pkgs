@@ -308,7 +308,7 @@ endif (BUILD_GRASPIT)
 ## Declare C++ executables
 add_executable(grasp_planning src/grasp_planning.cpp)
 add_executable(om_grasp_planning om/om_grasp_planning.cpp)
-add_executable(autograsp_planning om/autograsp_planning.cpp)
+#add_executable(autograsp_planning om/autograsp_planning.cpp)
 add_executable(simple_graspit_database test/simple_graspit_database.cpp)
 add_executable(simple_planning_tutorial tutorial/src/simple_planning_tutorial.cpp)
 
@@ -340,10 +340,10 @@ target_link_libraries(om_grasp_planning
     ${DEPEND_LIBRARIES}
 )
 
-target_link_libraries(autograsp_planning
-    grasp_planning_graspit
-    ${DEPEND_LIBRARIES}
-)
+# target_link_libraries(autograsp_planning
+#     grasp_planning_graspit
+#     ${DEPEND_LIBRARIES}
+# )
 
 target_link_libraries(simple_planning_tutorial
   grasp_planning_graspit
@@ -398,12 +398,12 @@ install(TARGETS om_grasp_planning
     LIBRARY DESTINATION ${BIN_DESTINATION}
     RUNTIME DESTINATION ${BIN_DESTINATION}
 )
-install(TARGETS autograsp_planning
-    EXPORT autograsp_planning-targets
-    ARCHIVE DESTINATION ${BIN_DESTINATION}
-    LIBRARY DESTINATION ${BIN_DESTINATION}
-    RUNTIME DESTINATION ${BIN_DESTINATION}
-)
+# install(TARGETS autograsp_planning
+#     EXPORT autograsp_planning-targets
+#     ARCHIVE DESTINATION ${BIN_DESTINATION}
+#     LIBRARY DESTINATION ${BIN_DESTINATION}
+#     RUNTIME DESTINATION ${BIN_DESTINATION}
+# )
 install(EXPORT grasp_planning_graspit-targets
     DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
 )
@@ -413,9 +413,9 @@ install(EXPORT grasp_planning-targets
 install(EXPORT om_grasp_planning-targets
     DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
 )
-install(EXPORT autograsp_planning-targets
-    DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
-)
+# install(EXPORT autograsp_planning-targets
+#     DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
+# )
 install(FILES
     cmake/${GRASP_PLANNNIG_GRASPIT_CONFIG_CMAKE}
     DESTINATION ${LIB_DESTINATION}/${PROJECT_NAME}
@@ -460,6 +460,9 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
         DESTINATION ${SHARE_DESTINATION}/doc
     )
 endif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
+
+add_subdirectory(pybind11)
+pybind11_add_module(autograsp_planning /om/autograsp_planning.cpp)
 
 #############
 ## Testing ##
