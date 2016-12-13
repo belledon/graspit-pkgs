@@ -18,7 +18,6 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
-#include <Eigen/Geometry>
 #include <grasp_planning_graspit/GraspItSceneManagerHeadless.h>
 // #include <grasp_planning_graspit/LogBinding.h>
 #include <grasp_planning_graspit/ContactGetter.h>
@@ -40,7 +39,7 @@ double * quickGrasp(
     std::string& objectFilename, 
     std::string& robotFilename,
     Eigen::Vector3d& robPos, 
-    Eigen::Quaterniond& robRot)
+    std::vector<double* > robRot)
 {
     // PRINTMSG("Initializing GraspIt")
     SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
@@ -51,7 +50,10 @@ double * quickGrasp(
     robotTransform.setIdentity();
     objectTransform.setIdentity();
     robotTransform.translate(robPos);
-    robotTransform.rotate(robRot);
+    // Have to do this because Eigen::Quaternion isn't covered by pybind/eigen
+    Eigen::Quaternion robRotQ(robRot[0], robRot[1], robRot[2])
+
+    robotTransform.rotate(robRotQ);
     
     std::string robotName="Robot1";
     std::string objectName="Object1";
