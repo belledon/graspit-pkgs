@@ -95,11 +95,12 @@ double* ContactGetter::autoGrasp(){
     Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Performing autograsp");
     h->autoGrasp(false);
-    std::string robotName="Robot1";
-    Robot *r = getGraspItSceneManager()->getRobot(robotName);
+    // std::string robotName="Robot1";
+    // Robot *r = getGraspItSceneManager()->getRobot(robotName);
+    Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Getting hand dofs");
     double *dofs;
-    r->getDOFVals(dofs);
+    h->getDOFVals(dofs);
     PRINTMSG("Obtained hand dofs");
     return dofs;
 }
