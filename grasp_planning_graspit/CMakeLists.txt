@@ -341,7 +341,7 @@ target_link_libraries(om_grasp_planning
 )
 
 target_link_libraries(autograsp_planning
-    grasp_planning_graspit
+    #grasp_planning_graspit
     ${DEPEND_LIBRARIES}
 )
 
