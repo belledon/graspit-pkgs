@@ -65,7 +65,7 @@ if (NOT COMPILE_WITH_CATKIN OR BUILD_GRASPIT)
     find_package(Eigen3 REQUIRED)
 endif (NOT COMPILE_WITH_CATKIN OR BUILD_GRASPIT)
 
-find_package(Boost REQUIRED COMPONENTS filesystem system thread program_options python)
+find_package(Boost REQUIRED COMPONENTS filesystem system thread program_options)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -461,7 +461,7 @@ if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
     )
 endif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/docs/html)
 
-add_subdirectory(/pybind11)
+add_subdirectory(pybind11)
 pybind11_add_module(autograsp_planning /om/autograsp_planning.cpp)
 
 #############
