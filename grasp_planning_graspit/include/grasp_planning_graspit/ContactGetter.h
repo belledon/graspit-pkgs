@@ -50,6 +50,7 @@ namespace GraspIt
 
 	protected:
 
+
     virtual void idleEventFromSceneManager();
 
     virtual void onSceneManagerShutdown();
@@ -89,6 +90,7 @@ namespace GraspIt
 			}
 			else{PRINTERROR("Could not lock the world to retrieve the body");}
 		}
+
 
 		Hand * getCurrentHand()
 		{
