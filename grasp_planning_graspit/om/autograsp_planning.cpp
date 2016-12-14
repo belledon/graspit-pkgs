@@ -37,7 +37,7 @@
 #include <typeinfo>
 
 
-double * quickGrasp( 
+std::vector<double> quickGrasp( 
     std::string& objectFilename, 
     std::string& robotFilename,
     Eigen::Vector3d& robPos, 
@@ -72,7 +72,7 @@ double * quickGrasp(
         PRINTERROR("Could not load object");
     }
     
-    double * dofs = cg->autoGrasp();
+    std::vector<double> dofs = cg->autoGrasp();
     return dofs;
 }
 
