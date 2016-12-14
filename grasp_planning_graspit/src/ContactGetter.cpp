@@ -90,7 +90,7 @@ void ContactGetter::onSceneManagerShutdown()
 #endif
 }
 
-std::vector<double>& ContactGetter::autoGrasp(){
+std::vector<double> ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
     Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Performing autograsp");
@@ -115,7 +115,7 @@ std::vector<double>& ContactGetter::autoGrasp(){
     const int numDOF = s->getHand()->getNumDOF();
     double * _dofs = new double[numDOF];
     handPosture->getHandDOF(_dofs);
-    std::vector<double>& dofs;
+    std::vector<double> dofs;
     for (int k = 0; k < numDOF; ++k)
     {
         dofs.push_back(_dofs[k]);
