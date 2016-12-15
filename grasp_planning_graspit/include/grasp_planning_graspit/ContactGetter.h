@@ -42,7 +42,7 @@ namespace GraspIt
 
 	public:
 
-		ContactGetter(const std::string& name, const SHARED_PTR<GraspItSceneManager>& interface);
+		ContactGetter(const std::string& name, SHARED_PTR<GraspItSceneManager>& interface);
 		virtual ~ContactGetter();
 
 		std::list< Contact* > getGraspContacts(const std::string& robName, const std::string& objName);
