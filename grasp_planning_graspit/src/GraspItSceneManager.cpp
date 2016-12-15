@@ -104,9 +104,7 @@ GraspItSceneManager::~GraspItSceneManager()
         delete fakeQObjectParent;
         fakeQObjectParent = NULL;
     }
-    PRINTMSG("Deleting fake QObject Parent");
-    delete fakeQObjectParent;
-    fakeQObjectParent = NULL;
+    
 }
 
 void GraspItSceneManager::initialize()
