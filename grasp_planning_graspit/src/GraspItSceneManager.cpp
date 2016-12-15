@@ -108,6 +108,7 @@ GraspItSceneManager::~GraspItSceneManager()
 
 void GraspItSceneManager::initialize()
 {
+    PRINTMSG("Initializing GraspItSceneManager...")
     if (initialized)
     {
         PRINTMSG("GraspItSceneManager already initialized.");
