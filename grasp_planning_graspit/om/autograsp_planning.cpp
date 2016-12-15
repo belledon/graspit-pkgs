@@ -112,7 +112,7 @@ std::vector<double> quickGrasp(
     
     std::vector<double> dofs = cg->autoGrasp();
     // cg.reset();
-    graspitMgr.reset->destroyCore();
+    graspitMgr->destroyCore();
     signal(SIGSEGV, handler);
     signal(SIGABRT, handler);
     // PRINT_INIT_STD();
