@@ -71,6 +71,7 @@ void GraspItSceneManagerHeadless::destroyCore()
         _core->exitMainLoop();
         waitForInventorState(false);
     }*/
+    PRINTMSG("Attemping to exit main loop");
     core->exitMainLoop();
     
     if (ivThread)
@@ -82,6 +83,7 @@ void GraspItSceneManagerHeadless::destroyCore()
     }
     if (core)
     {
+        PRINTMSG("Deleting core");
         delete core;
         core = NULL;
     }
@@ -126,7 +128,7 @@ void GraspItSceneManagerHeadless::ivThreadLoop(GraspItSceneManagerHeadless * _th
 
     // begin the main loop of inventor
     coreHeadless->startMainLoop();
-
+    PRINTMSG("Main loop complete!")
     _this->deleteIdleSensor();
 
     _this->setInventorReady(false);

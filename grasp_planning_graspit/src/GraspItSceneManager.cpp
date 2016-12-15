@@ -153,6 +153,7 @@ void GraspItSceneManager::shutdown()
 
     // notify all registered accessors that the manager is
     // shutting down.
+    PRINTMSG("Attemping to unregister accessors");
     registeredAccessorsMtx.lock();
     std::map<std::string, GraspItAccessor*>::iterator it;
     for (it = registeredAccessors.begin(); it != registeredAccessors.end(); ++it)
@@ -161,7 +162,9 @@ void GraspItSceneManager::shutdown()
         s->onSceneManagerShutdown();
     }
     registeredAccessorsMtx.unlock();
+    PRINTMSG("Finished unregistering accessors");
 
+    PRINTMSG("Attemping to destroy Graspit Core");
     // destroy core
     destroyCore();
 
@@ -173,6 +176,7 @@ void GraspItSceneManager::shutdown()
 
     if (fakeQObjectParent)
     {
+        PRINTMSG("Deleting fakeQObjectParent");
         delete fakeQObjectParent;
         fakeQObjectParent = NULL;
     }
