@@ -20,8 +20,9 @@
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 #include <Eigen/Geometry>
+
 #include <grasp_planning_graspit/GraspItSceneManagerHeadless.h>
-// #include <grasp_planning_graspit/LogBinding.h>
+#include <grasp_planning_graspit/LogBinding.h>
 #include <grasp_planning_graspit/ContactGetter.h>
 
 #include <string>
@@ -37,12 +38,44 @@
 #include <typeinfo>
 
 
-std::vector<double> quickGrasp( 
+/**
+ * Helper method to print the trace in case of a SIG event
+ */
+void print_trace(void)
+{
+    void *array[10];
+    size_t size;
+    char **strings;
+    size_t i;
+
+    size = backtrace(array, 10);
+    strings = backtrace_symbols(array, size);
+
+    printf("Obtained %zd stack frames.\n", size);
+
+    for (i = 0; i < size; i++)
+        printf("%s\n", strings[i]);
+
+    free(strings);
+}
+
+
+void handler(int sig)
+{
+    print_trace();
+    exit(1);
+}
+
+
+std::vector<double> quickGrasp(
     std::string& objectFilename, 
     std::string& robotFilename,
     Eigen::Vector3d& robPos, 
     const std::vector<double>& robRot)
 {
+    signal(SIGSEGV, handler);
+    signal(SIGABRT, handler);
+    PRINT_INIT_STD();
     PRINTMSG("Initializing GraspIt")
     SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
     SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("ContactGetter", graspitMgr));

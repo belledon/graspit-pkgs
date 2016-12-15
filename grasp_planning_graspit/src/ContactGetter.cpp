@@ -10,6 +10,7 @@
 #include <Inventor/actions/SoWriteAction.h>
 #include <Inventor/actions/SoGetBoundingBoxAction.h>
 #include <Inventor/sensors/SoIdleSensor.h>
+
 #include <boost/filesystem.hpp>
 
 using GraspIt::ContactGetter;
@@ -21,11 +22,10 @@ ContactGetter::ContactGetter(const std::string& name, const SHARED_PTR<GraspItSc
 #ifdef USE_SEPARATE_SOSENSOR
     mIdleSensor(NULL)
 #endif
-    // planCommand(NONE)
+    
 {
-    // mEnergyCalculator=new SearchEnergy();
-    // mEnergyCalculator->setStatStream(&std::cout);
-
+    
+    // statusThread = new THREAD_CONSTR(statusThreadLoop, this);
     if (!eventThreadRunsQt())
     {
         PRINTERROR("EigenGraspPlanner supports only GraspItSceneManager instances which run Qt.");
@@ -53,11 +53,28 @@ ContactGetter::~ContactGetter()
         mIdleSensor = NULL;
     }
 #endif
-    PRINTMSG("Exit ContactGetter destructor");
-}
+//     PRINTMSG("Exit ContactGetter destructor");
+//     if (statusThread)
+//     {
+//         statusThread->detach();
+//         delete statusThread;
+//         statusThread = NULL;
+//     }
+
+//     PRINTMSG("Exit ContactGetter destructor");
+// }
 
 void ContactGetter::idleEventFromSceneManager()
-{
+// {
+//     if (statusThread)
+//     {
+//         statusThread->detach();
+//         delete statusThread;
+//         statusThread = NULL;
+//     }
+    
+// }
+// {
 #ifdef USE_SEPARATE_SOSENSOR
     if (mIdleSensor)
     {
@@ -70,11 +87,18 @@ void ContactGetter::idleEventFromSceneManager()
     mIdleSensor->schedule();
 #else
     scheduleForIdleEventUpdate();
+    ivIdleCallback();
 #endif
 }
 
 void ContactGetter::onSceneManagerShutdown()
 {
+    //     if (statusThread)
+    // {
+    //     statusThread->detach();
+    //     delete statusThread;
+    //     statusThread = NULL;
+    // }
 #ifdef USE_SEPARATE_SOSENSOR
     // quit the idle sensor to avoid conflicts when Inventor
     // is shut down
@@ -90,11 +114,13 @@ void ContactGetter::onSceneManagerShutdown()
 #endif
 }
 
+
+
 std::vector<double> ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
     Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Performing autograsp");
-    GraspPlanningState gst = GraspPlanningState(h);
+    GraspPlanningState gst = new GraspPlanningState(h);
     const GraspPlanningState *s;
     s = &gst;
     if (!s->getHand()->autoGrasp(false))
@@ -122,6 +148,9 @@ std::vector<double> ContactGetter::autoGrasp(){
     }
     // r->getDOFVals(dofs);
     PRINTMSG("Obtained hand dofs");
+    PRINTMSG("Cleaning up");
+    delete *s;
+    gst.clear();
     return dofs;
 }
 

@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-
+class GraspPlanningState;
 class GraspItAccessor;
 
 namespace GraspIt
@@ -57,6 +57,8 @@ namespace GraspIt
 
 
 	private:
+
+		
 
 		Robot * getGraspRobot(const std::string& robName)
 		{
@@ -148,6 +150,8 @@ namespace GraspIt
 			v.push_back(v3.y());
 			v.push_back(v3.y());
 		}
+
+		RECURSIVE_MUTEX contactGettermtx;
 
 };
 } // namespace GraspIt
