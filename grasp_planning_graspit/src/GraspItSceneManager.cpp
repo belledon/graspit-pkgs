@@ -92,18 +92,21 @@ GraspItSceneManager::~GraspItSceneManager()
 {
     PRINTMSG("GraspItSceneManager destructor");
 
-    // if (core)
-    // {
-    //     PRINTERROR("The IVmgr should have been deleted, either by calling shutdown(), or by subclasses destructor!");
-    //     throw std::string("The IVmgr should have been deleted, either by calling shutdown(), or by subclasses destructor!");
-    // }
+    if (core)
+    {
+        PRINTERROR("The IVmgr should have been deleted, either by calling shutdown(), or by subclasses destructor!");
+        throw std::string("The IVmgr should have been deleted, either by calling shutdown(), or by subclasses destructor!");
+    }
 
     if (fakeQObjectParent)
     {
         PRINTMSG("Deleting fake QObject Parent");
         delete fakeQObjectParent;
-        // fakeQObjectParent = NULL;
+        fakeQObjectParent = NULL;
     }
+    PRINTMSG("Deleting fake QObject Parent");
+    delete fakeQObjectParent;
+    fakeQObjectParent = NULL;
 }
 
 void GraspItSceneManager::initialize()

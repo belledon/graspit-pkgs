@@ -78,12 +78,12 @@ void GraspItSceneManagerHeadless::destroyCore()
         PRINTMSG("Now exit Inventor thread.");
         ivThread->join();
         delete ivThread;
-        // ivThread = NULL;
+        ivThread = NULL;
     }
     if (core)
     {
         delete core;
-        // core = NULL;
+        core = NULL;
     }
     PRINTMSG("Done in destroyCore()");
 }
