@@ -62,10 +62,10 @@ ContactGetter::~ContactGetter()
 //     }
 
 //     PRINTMSG("Exit ContactGetter destructor");
-// }
+}
 
 void ContactGetter::idleEventFromSceneManager()
-// {
+{
 //     if (statusThread)
 //     {
 //         statusThread->detach();
