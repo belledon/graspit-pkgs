@@ -149,7 +149,13 @@ void GraspItSceneManagerHeadless::waitUntilReady() const
 
 void GraspItSceneManagerHeadless::waitForInventorState(const bool value) const
 {
-    while (isInventorReady() != value) SLEEP(0.1);
+    int c = 0;
+    while ((isInventorReady() != value) && (c < 100))
+    {
+        SLEEP(0.1);
+        c += 1;
+    } 
+    PRINTMSG("Inventor state would not update after waiting for 10 seconds")
 }
 
 bool GraspItSceneManagerHeadless::isInventorReady() const
