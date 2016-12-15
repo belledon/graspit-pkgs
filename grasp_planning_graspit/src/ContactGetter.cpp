@@ -15,7 +15,7 @@
 using GraspIt::ContactGetter;
 using GraspIt::Log;
 
-ContactGetter::ContactGetter(const std::string& name, const SHARED_PTR<GraspItSceneManager>& intr):
+ContactGetter::ContactGetter(const std::string& name, SHARED_PTR<GraspItSceneManager>& intr):
     GraspItAccessor(name, intr)
 
 #ifdef USE_SEPARATE_SOSENSOR
