@@ -87,7 +87,7 @@ void ContactGetter::idleEventFromSceneManager()
     mIdleSensor->schedule();
 #else
     scheduleForIdleEventUpdate();
-    ivIdleCallback();
+    // ivIdleCallback();
 #endif
 }
 
