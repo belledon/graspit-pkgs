@@ -22,7 +22,7 @@
 #include <Eigen/Geometry>
 
 #include <grasp_planning_graspit/GraspItSceneManagerHeadless.h>
-// #include <grasp_planning_graspit/LogBinding.h>
+#include <grasp_planning_graspit/LogBinding.h>
 #include <grasp_planning_graspit/ContactGetter.h>
 
 #include <string>
