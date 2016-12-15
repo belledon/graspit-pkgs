@@ -33,9 +33,8 @@ namespace GraspIt
 {
 
 
-	class ContactGetter: public QObject, public GraspItAccessor
+	class ContactGetter:  public GraspItAccessor
 	{
-		Q_OBJECT
 
 	public:
 

@@ -1,7 +1,6 @@
 //ContactGetter.cpp
 
 #include <grasp_planning_graspit/ContactGetter.h>
-#include <grasp_planning_graspit/LogBinding.h>
 #include <grasp_planning_graspit/PrintHelpers.h>
 #include <grasp_planning_graspit/GraspItHelpers.h>
 #include <EGPlanner/searchState.h>
@@ -56,15 +55,13 @@ ContactGetter::~ContactGetter()
         mIdleSensor = NULL;
     }
 #endif
-//     PRINTMSG("Exit ContactGetter destructor");
+    PRINTMSG("Exit ContactGetter destructor");
 //     if (statusThread)
 //     {
 //         statusThread->detach();
 //         delete statusThread;
 //         statusThread = NULL;
 //     }
-
-    PRINTMSG("Exit ContactGetter destructor");
 }
 
 void ContactGetter::idleEventFromSceneManager()
