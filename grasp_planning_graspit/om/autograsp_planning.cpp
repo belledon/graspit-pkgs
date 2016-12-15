@@ -78,9 +78,13 @@ std::vector<double> quickGrasp(
     signal(SIGSEGV, handler);
     signal(SIGABRT, handler);
     PRINT_INIT_STD();
+
     PRINTMSG("Initializing GraspIt")
+    td::string name = "ContactGetter"; 
     SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
-    SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter("ContactGetter", graspitMgr));
+    graspitMgr.reset()
+    SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter(name, graspitMgr));
+    
     GraspIt::EigenTransform robotTransform;
     GraspIt::EigenTransform objectTransform;
     // We want to keep the object at the absolute origin

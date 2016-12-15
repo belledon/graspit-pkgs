@@ -77,7 +77,6 @@ void GraspItSceneManagerHeadless::destroyCore()
     {
         PRINTMSG("Now exit Inventor thread.");
         ivThread->join();
-        ivThread->detach();
         delete ivThread;
         ivThread = NULL;
     }
@@ -166,6 +165,7 @@ void GraspItSceneManagerHeadless::setInventorReady(const bool flag)
 
 void GraspItSceneManagerHeadless::deleteIdleSensor()
 {
+    PRINTMSG("Deleting Idle sensor")
     if (mIdleSensor)
     {
         if (mIdleSensor->isScheduled()) mIdleSensor->unschedule();
