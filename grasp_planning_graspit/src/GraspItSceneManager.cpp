@@ -139,6 +139,7 @@ void GraspItSceneManager::initialize()
 
 void GraspItSceneManager::shutdown()
 {
+    PRINTMSG("GraspItSceneManager shutdown")
     if (!initialized)
     {
         PRINTMSG("GraspItSceneManager already shut down.");
