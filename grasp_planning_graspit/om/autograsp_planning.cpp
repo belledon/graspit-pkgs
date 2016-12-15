@@ -112,7 +112,7 @@ std::vector<double> quickGrasp(
     // graspitMgr.reset();
     signal(SIGSEGV, handler);
     signal(SIGABRT, handler);
-    PRINT_INIT_STD();
+    // PRINT_INIT_STD();
     
     return dofs;
 }
