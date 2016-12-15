@@ -38,6 +38,8 @@
 #include <typeinfo>
 
 
+\
+
 /**
  * Helper method to print the trace in case of a SIG event
  */
@@ -108,6 +110,9 @@ std::vector<double> quickGrasp(
     std::vector<double> dofs = cg->autoGrasp();
     // cg.reset();
     // graspitMgr.reset();
+    signal(SIGSEGV, handler);
+    signal(SIGABRT, handler);
+    PRINT_INIT_STD();
     
     return dofs;
 }

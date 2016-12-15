@@ -100,6 +100,7 @@ void ContactGetter::onSceneManagerShutdown()
     //     delete statusThread;
     //     statusThread = NULL;
     // }
+    PRINTMSG("SceneManagerShutdown for ContactGetter")
 #ifdef USE_SEPARATE_SOSENSOR
     // quit the idle sensor to avoid conflicts when Inventor
     // is shut down

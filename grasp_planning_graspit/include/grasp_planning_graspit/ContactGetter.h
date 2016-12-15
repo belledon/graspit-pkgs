@@ -13,7 +13,7 @@
 // grasp_planning_graspit
 #include <grasp_planning_graspit/GraspItSceneManager.h>
 #include <grasp_planning_graspit/GraspItAccessor.h>
-#include <grasp_planning_graspit/LogBinding.h>
+
 
 // graspit
 #include <robot.h>
@@ -26,8 +26,12 @@
 #include <string>
 #include <vector>
 
+#include <QObject>
+
 class GraspPlanningState;
+class GraspableBody;
 class GraspItAccessor;
+
 
 namespace GraspIt
 {
