@@ -149,7 +149,7 @@ std::vector<double> ContactGetter::autoGrasp(){
     // r->getDOFVals(dofs);
     PRINTMSG("Obtained hand dofs");
     PRINTMSG("Cleaning up");
-    delete s;
+    // delete s;
     return dofs;
 }
 
