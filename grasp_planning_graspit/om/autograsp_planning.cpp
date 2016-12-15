@@ -112,7 +112,7 @@ std::vector<double> quickGrasp(
 }
 
 namespace py = pybind11;
-
+PYBIND11_DECLARE_HOLDER_TYPE(T, SHARED_PTR<T>);
 PYBIND11_PLUGIN(autograsp_planning) {
     py::module m("autograsp_planning", "Graspit!-quickGrasp plugin");
 
@@ -120,6 +120,7 @@ PYBIND11_PLUGIN(autograsp_planning) {
 
     return m.ptr();
 }
+
 
 
 // /*
