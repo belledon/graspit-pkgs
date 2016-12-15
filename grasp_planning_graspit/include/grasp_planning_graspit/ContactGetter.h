@@ -33,8 +33,10 @@ namespace GraspIt
 {
 
 
-	class ContactGetter: public GraspItAccessor
+	class ContactGetter: public QObject, public GraspItAccessor
 	{
+		Q_OBJECT
+
 	public:
 
 		ContactGetter(const std::string& name, const SHARED_PTR<GraspItSceneManager>& interface);
@@ -151,8 +153,9 @@ namespace GraspIt
 			v.push_back(v3.y());
 		}
 
-		RECURSIVE_MUTEX contactGettermtx;
-
+#ifdef USE_SEPARATE_SOSENSOR
+    SoSensor *mIdleSensor;
+#endif
 };
 } // namespace GraspIt
 #endif // GRASP_PLANNING_GRASPIT_CONTACTGETTER_H_INCLUDED__
