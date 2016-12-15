@@ -38,6 +38,7 @@ ContactGetter::ContactGetter(const std::string& name, const SHARED_PTR<GraspItSc
 ContactGetter::~ContactGetter()
 {
     PRINTMSG("ContactGetter destructor");
+    PRINTMSG("Removing idle listeners");
     removeFromIdleListeners();
 
 #ifdef USE_SEPARATE_SOSENSOR
@@ -47,8 +48,10 @@ ContactGetter::~ContactGetter()
     {
         if (mIdleSensor->isScheduled())
         {
+            PRINTMSG("Unscheduling sensor");
             mIdleSensor->unschedule();
         }
+        PRINTMSG("Deleting sensor");
         delete mIdleSensor;
         mIdleSensor = NULL;
     }
@@ -61,7 +64,7 @@ ContactGetter::~ContactGetter()
 //         statusThread = NULL;
 //     }
 
-//     PRINTMSG("Exit ContactGetter destructor");
+    PRINTMSG("Exit ContactGetter destructor");
 }
 
 void ContactGetter::idleEventFromSceneManager()
@@ -87,6 +90,7 @@ void ContactGetter::idleEventFromSceneManager()
     mIdleSensor->schedule();
 #else
     scheduleForIdleEventUpdate();
+    PRINTMSG("Stuck right before ivIdleCallback")
     // ivIdleCallback();
 #endif
 }
