@@ -77,6 +77,7 @@ void GraspItSceneManagerHeadless::destroyCore()
     {
         PRINTMSG("Now exit Inventor thread.");
         ivThread->join();
+        ivThread->detach();
         delete ivThread;
         ivThread = NULL;
     }
