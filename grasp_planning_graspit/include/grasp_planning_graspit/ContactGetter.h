@@ -157,6 +157,13 @@ namespace GraspIt
 		}
 
 #ifdef USE_SEPARATE_SOSENSOR
+    /**
+     * Callback method for locally used SoIdleSensor
+     */
+    static void sensorCB(void *data, SoSensor *);
+#endif
+
+#ifdef USE_SEPARATE_SOSENSOR
     SoSensor *mIdleSensor;
 #endif
 };

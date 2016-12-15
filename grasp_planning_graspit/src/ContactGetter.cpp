@@ -117,6 +117,24 @@ void ContactGetter::onSceneManagerShutdown()
 }
 
 
+#ifdef USE_SEPARATE_SOSENSOR
+void ContactGetter::sensorCB(void *data, SoSensor *)
+{
+    // PRINTMSG(" ### sensorCB ###");
+    ContactGetter* _this = dynamic_cast<ContactGetter*>(static_cast<ContactGetter*>(data));
+    if (!_this)
+    {
+        PRINTERROR("Could not cast ContactGetter");
+        return;
+    }
+
+    // _this->ivIdleCallback();
+
+    // trigger another call of this method in the next event loop iteration
+    _this->mIdleSensor->schedule();
+}
+#endif
+
 
 std::vector<double> ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
