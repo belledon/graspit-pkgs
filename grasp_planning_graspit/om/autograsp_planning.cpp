@@ -82,7 +82,6 @@ std::vector<double> quickGrasp(
     PRINTMSG("Initializing GraspIt")
     std::string name = "ContactGetter"; 
     SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
-    graspitMgr.reset();
     SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter(name, graspitMgr));
     
     GraspIt::EigenTransform robotTransform;
@@ -113,7 +112,7 @@ std::vector<double> quickGrasp(
     
     std::vector<double> dofs = cg->autoGrasp();
     // cg.reset();
-    // graspitMgr.reset();
+    graspitMgr.reset();
     signal(SIGSEGV, handler);
     signal(SIGABRT, handler);
     // PRINT_INIT_STD();
