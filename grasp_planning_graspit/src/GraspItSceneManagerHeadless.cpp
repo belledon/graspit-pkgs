@@ -42,6 +42,7 @@ GraspItSceneManagerHeadless::GraspItSceneManagerHeadless():
 
 GraspItSceneManagerHeadless::~GraspItSceneManagerHeadless()
 {
+    PRINTMSG("GraspItSceneManagerHeadless Destructor")
     shutdown();
 }
 
