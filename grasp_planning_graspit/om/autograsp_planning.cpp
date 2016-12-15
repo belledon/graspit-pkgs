@@ -80,7 +80,7 @@ std::vector<double> quickGrasp(
     PRINT_INIT_STD();
 
     PRINTMSG("Initializing GraspIt")
-    td::string name = "ContactGetter"; 
+    std::string name = "ContactGetter"; 
     SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
     graspitMgr.reset();
     SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter(name, graspitMgr));
