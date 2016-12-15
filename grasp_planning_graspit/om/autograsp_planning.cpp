@@ -106,8 +106,8 @@ std::vector<double> quickGrasp(
     }
     
     std::vector<double> dofs = cg->autoGrasp();
-    cg.reset();
-    graspitMgr.reset();
+    // cg.reset();
+    // graspitMgr.reset();
     
     return dofs;
 }
