@@ -81,34 +81,34 @@ std::vector<double> quickGrasp(
 
     PRINTMSG("Initializing GraspIt")
     std::string name = "ContactGetter"; 
-    SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
-    // SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter(name, graspitMgr));
+    // SHARED_PTR<GraspIt::GraspItSceneManager> graspitMgr(new GraspIt::GraspItSceneManagerHeadless());  
+    // // SHARED_PTR<GraspIt::ContactGetter> cg(new GraspIt::ContactGetter(name, graspitMgr));
     
-    GraspIt::EigenTransform robotTransform;
-    GraspIt::EigenTransform objectTransform;
-    // We want to keep the object at the absolute origin
-    robotTransform.setIdentity();
-    objectTransform.setIdentity();
-    robotTransform.translate(robPos);
-    // Have to do this because Eigen::Quaternion isn't covered by pybind/eigen
-      // Eigen::Quaterniond q(2, 0, 1, -3); 
-    Eigen::Quaterniond robRotQ(robRot[0], robRot[1], robRot[2], robRot[3]);
-    robotTransform.rotate(robRotQ);
-    // robotTransform.rotate(robRot);
+    // GraspIt::EigenTransform robotTransform;
+    // GraspIt::EigenTransform objectTransform;
+    // // We want to keep the object at the absolute origin
+    // robotTransform.setIdentity();
+    // objectTransform.setIdentity();
+    // robotTransform.translate(robPos);
+    // // Have to do this because Eigen::Quaternion isn't covered by pybind/eigen
+    //   // Eigen::Quaterniond q(2, 0, 1, -3); 
+    // Eigen::Quaterniond robRotQ(robRot[0], robRot[1], robRot[2], robRot[3]);
+    // robotTransform.rotate(robRotQ);
+    // // robotTransform.rotate(robRot);
     
-    std::string robotName="Robot1";
-    std::string objectName="Object1";
+    // std::string robotName="Robot1";
+    // std::string objectName="Object1";
 
-    if (graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0)
-    {
-        PRINTERROR("Could not load robot");
+    // if (graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0)
+    // {
+    //     PRINTERROR("Could not load robot");
         
-    }
+    // }
 
-    if (graspitMgr->loadObject(objectFilename, objectName, true, objectTransform))
-    {
-        PRINTERROR("Could not load object");
-    }
+    // if (graspitMgr->loadObject(objectFilename, objectName, true, objectTransform))
+    // {
+    //     PRINTERROR("Could not load object");
+    // }
     
     std::vector<double> dofs;// = cg->autoGrasp();
     // cg.reset();
