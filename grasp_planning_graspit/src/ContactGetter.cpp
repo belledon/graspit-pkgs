@@ -140,7 +140,7 @@ std::vector<double> ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
     Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Performing autograsp");
-    GraspPlanningState gst = new GraspPlanningState(h);
+    GraspPlanningState gst = GraspPlanningState(h);
     const GraspPlanningState *s;
     s = &gst;
     if (!s->getHand()->autoGrasp(false))
