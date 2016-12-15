@@ -29,10 +29,10 @@
 #include <boost/shared_ptr.hpp>
 #define SHARED_PTR boost::shared_ptr
 
-#else  // use C++11 std
+// #else  // use C++11 std
 
-#include <memory>
-#define SHARED_PTR std::shared_ptr
+// #include <memory>
+// #define SHARED_PTR std::shared_ptr
 
 #endif
 
