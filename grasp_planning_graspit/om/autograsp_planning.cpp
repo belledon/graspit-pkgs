@@ -89,7 +89,7 @@ std::vector<double> quickGrasp(
     robotTransform.setIdentity();
     objectTransform.setIdentity();
     robotTransform.translate(robPos);
-    // Have to do this because Eigen::Quaternion isn't covered by pybind/eigen
+    // Have to do this because Eigen::Quaternion isn"t covered by pybind/eigen
       // Eigen::Quaterniond q(2, 0, 1, -3); 
     Eigen::Quaterniond robRotQ(robRot[0], robRot[1], robRot[2], robRot[3]);
     robotTransform.rotate(robRotQ);
@@ -170,25 +170,25 @@ bool loadParams(int argc, char ** argv,
       return false;
   }
   // Validate user input
-  if (!vm.count('obj'))
+  if (!vm.count("obj"))
   {
     PRINTERROR("Must specify object file");
     PRINTMSG(desc);
     return false;
   } 
-  if (!vm.count('rob'))
+  if (!vm.count("rob"))
   {
     PRINTERROR("Must specify robot file");
     PRINTMSG(desc);
     return false;
   }
-  if (!vm.count('rob_pos'))
+  if (!vm.count("rob_pos"))
   {
     PRINTERROR("Must specify robot position");
     PRINTMSG(desc);
     return false;
   } 
-  if (!vm.count('rob_rot'))
+  if (!vm.count("rob_rot"))
   {
     PRINTERROR("Must specify robot rotation");
     PRINTMSG(desc);
