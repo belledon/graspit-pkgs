@@ -128,8 +128,8 @@ boost::program_options::options_description getOptions()
     ("help", "produce help message")
     ("rob", boost::program_options::value<std::string>(), "filename for the robot file")
     ("obj", boost::program_options::value<std::string>(), "filename for the object file")
-    ("rob_pos", boost::program_options::value<std::vector<float> >()->multitoken(), "Position of the object relative to the robot: Specify one x, y and z value.")
-    ("rob_rot", boost::program_options::value<std::vector<float> >()->multitoken(), "A 4d quaternion to specify robot rotation.");
+    ("rob_pos", boost::program_options::value<std::vector<double> >()->multitoken(), "Position of the object relative to the robot: Specify one x, y and z value.")
+    ("rob_rot", boost::program_options::value<std::vector<double> >()->multitoken(), "A 4d quaternion to specify robot rotation.");
     return desc;
 }
 
@@ -225,7 +225,7 @@ bool loadParams(int argc, char ** argv,
   }
   if (vm.count("rob_pos"))
   {
-    std::vector<float> vals=vm["rob_pos"].as<std::vector<float> >();
+    std::vector<double> vals=vm["rob_pos"].as<std::vector<double> >();
     if (vals.size()!=3)
     {
         PRINTERROR("Must specify 3 values for --rob_pos: x, y and z (specified "<<vals.size()<<")");
@@ -236,15 +236,31 @@ bool loadParams(int argc, char ** argv,
   }
   if (vm.count("rob_rot"))
   {
-    std::vector<float> vals=vm["rob_rot"].as<std::vector<float> >();
+    std::vector<double> vals=vm["rob_rot"].as<std::vector<double> >();
     if (vals.size() != 4)
     {
       PRINTERROR("Must specify 4 values for --rob_rot: w, x, y, z (specified "<<vals.size()<<")");
       PRINTMSG(desc);
     }
-    rob_rot = vals;
+    robRot = vals;
   }
   return true;
+}
+
+template <class T>
+
+std::string vecToStr(std::vector<T> v)
+{
+    
+    std::stringstream ss;
+    for(size_t i = 0; i < v.size(); ++i)
+    {
+      if(i != 0)
+        ss << ",";
+      ss << v[i];
+    }
+    std::string s = ss.str();
+    return s;
 }
 
 int main(int argc, char **argv)
@@ -268,7 +284,7 @@ int main(int argc, char **argv)
   PRINTMSG("Performing quickGrasp...");
   std::vector<double> dofs = quickGrasp(objectFilename, robotFilename, robPos, robRot);
   PRINTMSG("The resulting dofs are");
-  cout << dofs;
+  std::cout << vecToStr(dofs);
   return 0;
 
 }
@@ -279,7 +295,7 @@ PYBIND11_PLUGIN(autograsp_planning) {
     py::module m("autograsp_planning", "Graspit!-quickGrasp plugin");
 
     m.def("quickGrasp", &quickGrasp, "Performs Graspit!-autograsp");
-    m.def("main", &main, "Main call to quickGrasp");
+    // m.def("main", &main, "Main call to quickGrasp");
     return m.ptr();
 }
 
