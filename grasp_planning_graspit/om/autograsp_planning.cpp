@@ -242,7 +242,7 @@ bool loadParams(int argc, char ** argv,
       PRINTERROR("Must specify 4 values for --rob_rot: w, x, y, z (specified "<<vals.size()<<")");
       PRINTMSG(desc);
     }
-    rob_rot = vals;
+    robRot = vals;
   }
   return true;
 }
