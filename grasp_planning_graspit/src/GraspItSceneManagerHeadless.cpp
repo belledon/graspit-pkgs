@@ -48,10 +48,10 @@ GraspItSceneManagerHeadless::~GraspItSceneManagerHeadless()
 
 void GraspItSceneManagerHeadless::initializeCore()
 {
-    PRINTMSG('start the thread loop which will kick off a new thread to run the QT Application');
+    PRINTMSG("start the thread loop which will kick off a new thread to run the QT Application");
     ivThread = new THREAD_CONSTR(ivThreadLoop, this);
 
-    PRINTMSG('wait until Qt is initialized before doing anything else');
+    PRINTMSG("wait until Qt is initialized before doing anything else");
     waitForInventorState(true);
 }
 
