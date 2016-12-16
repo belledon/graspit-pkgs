@@ -147,7 +147,7 @@ bool loadParams(int argc, char ** argv,
   std::string& objectFilename, 
   std::string& robotFilename,
   Eigen::Vector3d robPos,
-  std::std::vector<double> robRot)
+  std::vector<double> robRot)
 {
   objectFilename.clear();
   robotFilename.clear();
@@ -257,7 +257,7 @@ int main(int argc, char **argv)
   std::string objectFilename;
   std::string robotFilename;
   Eigen::Vector3d robPos;
-  std::std::vector<double> robRot;
+  std::vector<double> robRot;
 
   if (!loadParams(argc, argv, objectFilename, robotFilename, robPos, robRot))
   {
@@ -266,7 +266,7 @@ int main(int argc, char **argv)
   }
 
   PRINTMSG("Performing quickGrasp...");
-  std::std::vector<double> dofs = quickGrasp(objectFilename, robotFilename, robPos, robRot);
+  std::vector<double> dofs = quickGrasp(objectFilename, robotFilename, robPos, robRot);
   PRINTMSG("The resulting dofs are");
   cout << dofs;
   return 0;
