@@ -48,10 +48,10 @@ GraspItSceneManagerHeadless::~GraspItSceneManagerHeadless()
 
 void GraspItSceneManagerHeadless::initializeCore()
 {
-    // start the thread loop which will kick off a new thread to run the QT Application
+    PRINTMSG('start the thread loop which will kick off a new thread to run the QT Application');
     ivThread = new THREAD_CONSTR(ivThreadLoop, this);
 
-    // wait until Qt is initialized before doing anything else
+    PRINTMSG('wait until Qt is initialized before doing anything else');
     waitForInventorState(true);
 }
 
@@ -120,12 +120,15 @@ void GraspItSceneManagerHeadless::ivThreadLoop(GraspItSceneManagerHeadless * _th
     PRINTMSG("Created.");
     _this->core = coreHeadless;
 
+    PRINTMSG("Creating SoIdleSensor");
     _this->createIdleSensor();
 
     // we will schedule the idle sensor once, so that
     // it can call _this->setInventorReady(true)
+    PRINTMSG("Scheduling SoIdleSensor");
     _this->mIdleSensor->schedule();
 
+    PRINTMSG("Starting main loop");
     // begin the main loop of inventor
     coreHeadless->startMainLoop();
     PRINTMSG("Main loop complete!")
