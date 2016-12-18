@@ -141,12 +141,15 @@ std::vector<double> ContactGetter::autoGrasp(){
     Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Performing autograsp");
     GraspPlanningState gst = GraspPlanningState(h);
-    const GraspPlanningState *s;
+    GraspPlanningState *s;
     s = &gst;
     if (!s->getHand()->autoGrasp(false))
     {
         PRINTWARN("Could not correctly open hand with auto-grasp, the pre-grasp state may not be ideal.");
     }
+    PRINTMSG("Saving result");
+    s->saveCurrentHandState();
+    
     
     const PostureState* handPosture = s->readPosture();
     if (!handPosture)

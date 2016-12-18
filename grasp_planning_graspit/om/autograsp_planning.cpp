@@ -76,7 +76,8 @@ std::vector<double> quickGrasp(
     std::string& objectFilename, 
     std::string& robotFilename,
     Eigen::Vector3d& robPos, 
-    const std::vector<double>& robRot)
+    const std::vector<double>& robRot,
+    std::string& out)
 {
     signal(SIGSEGV, handler);
     signal(SIGABRT, handler);
@@ -99,8 +100,8 @@ std::vector<double> quickGrasp(
     robotTransform.rotate(robRotQ);
     // robotTransform.rotate(robRot);
     
-    std::string robotName="Robot1";
-    std::string objectName="Object1";
+    std::string robotName="Robot";
+    std::string objectName="Object";
 
     if (graspitMgr->loadRobot(robotFilename, robotName, robotTransform) != 0)
     {
@@ -113,7 +114,18 @@ std::vector<double> quickGrasp(
         PRINTERROR("Could not load object");
     }
     
-    std::vector<double> dofs;// = cg->autoGrasp();
+    std::vector<double> dofs = cg->autoGrasp();
+    if (!out.empty())
+    {
+      PRINTMSG("Saving grasp to : " << out);
+      std::stringstream _wFilename;
+      _wFilename << out << "/" << "grasp_pose.iv";
+      std::string wFilename = _wFilename.str();
+      if (!graspitMgr->saveRobotAsInventor( wFilename, robotName, true, true))
+        {
+            PRINTERROR("GraspIt could not save robot pose file " << out);
+        }
+    }
     // cg.reset();
     // graspitMgr->destroyCore();
     
@@ -129,7 +141,8 @@ boost::program_options::options_description getOptions()
     ("rob", boost::program_options::value<std::string>(), "filename for the robot file")
     ("obj", boost::program_options::value<std::string>(), "filename for the object file")
     ("rob_pos", boost::program_options::value<std::vector<double> >()->multitoken(), "Position of the object relative to the robot: Specify one x, y and z value.")
-    ("rob_rot", boost::program_options::value<std::vector<double> >()->multitoken(), "A 4d quaternion to specify robot rotation.");
+    ("rob_rot", boost::program_options::value<std::vector<double> >()->multitoken(), "A 4d quaternion to specify robot rotation.")
+    ("out", boost::program_options::value<std::string>(), "path to save renders");;
     return desc;
 }
 
@@ -147,11 +160,12 @@ bool loadParams(int argc, char ** argv,
   std::string& objectFilename, 
   std::string& robotFilename,
   Eigen::Vector3d robPos,
-  std::vector<double> robRot)
+  std::vector<double> robRot,
+  std::string& out)
 {
   objectFilename.clear();
   robotFilename.clear();
-
+  out.clear();
   boost::program_options::variables_map vm;
   try
   {
@@ -244,6 +258,11 @@ bool loadParams(int argc, char ** argv,
     }
     robRot = vals;
   }
+  if (vm.count("out"))
+  {
+    out = vm["out"].as<std::string>();
+    PRINTMSG("Saving output to " << out);
+  }
   return true;
 }
 
@@ -274,15 +293,17 @@ int main(int argc, char **argv)
   std::string robotFilename;
   Eigen::Vector3d robPos;
   std::vector<double> robRot;
+  std::string out;
 
-  if (!loadParams(argc, argv, objectFilename, robotFilename, robPos, robRot))
+  if (!loadParams(argc, argv, objectFilename, robotFilename, robPos, robRot, out))
   {
     PRINTERROR("Could not read arguments");
     return 1;
   }
 
   PRINTMSG("Performing quickGrasp...");
-  std::vector<double> dofs = quickGrasp(objectFilename, robotFilename, robPos, robRot);
+  std::vector<double> dofs = quickGrasp(
+    objectFilename, robotFilename, robPos, robRot, out);
   PRINTMSG("The resulting dofs are");
   std::cout << vecToStr(dofs);
   return 0;
