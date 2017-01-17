@@ -74,7 +74,7 @@ void handler(int sig)
 
 std::vector<double> quickGrasp(
     std::string& objectFilename, 
-    const std::vector<double>& objRot,
+    std::array<double, 4>& objRot,
     std::string& robotFilename,
     Eigen::Vector3d& robPos, 
     std::array<double, 4>& robRot,
@@ -101,7 +101,7 @@ std::vector<double> quickGrasp(
     Eigen::Quaterniond robRotQ(robRot[0], robRot[1], robRot[2], robRot[3]);
     robotTransform.rotate(robRotQ);
 
-    Eigen::Quaterniond objRotQ(objRot[0], objRot[1], objRot[2], objRot[2]);
+    Eigen::Quaterniond objRotQ(objRot[0], objRot[1], objRot[2], objRot[3]);
     robotTransform.rotate(objRotQ);
     // robotTransform.rotate(robRot);
     
@@ -300,7 +300,7 @@ int main(int argc, char **argv)
   std::array<double, 4> robRot;
   std::string out;
 
-  std::vector<double> objRot = {0,0,0,0};
+  std::array<double, 4> objRot = {0,0,0,0};
   if (!loadParams(argc, argv, objectFilename, robotFilename, robPos, robRot, out))
   {
     PRINTERROR("Could not read arguments");
@@ -322,7 +322,7 @@ PYBIND11_PLUGIN(autograsp_planning) {
     py::module m("autograsp_planning", "Graspit!-quickGrasp plugin");
 
     m.def("quickGrasp", &quickGrasp, "Performs Graspit!-autograsp",
-      py::arg("objectFilename"), py::arg("robotFilename"), 
+      py::arg("objectFilename"), py::arg("objRot"), py::arg("robotFilename"), 
       py::arg("robPos"), py::arg("robRot"), py::arg("out"));
     // m.def("main", &main, "Main call to quickGrasp");
     return m.ptr();
