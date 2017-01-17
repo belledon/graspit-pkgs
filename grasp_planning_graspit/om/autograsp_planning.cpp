@@ -74,6 +74,7 @@ void handler(int sig)
 
 std::vector<double> quickGrasp(
     std::string& objectFilename, 
+    const std::vector<double>& objRot,
     std::string& robotFilename,
     Eigen::Vector3d& robPos, 
     std::array<double, 4>& robRot,
@@ -99,6 +100,9 @@ std::vector<double> quickGrasp(
       // Eigen::Quaterniond q(2, 0, 1, -3); 
     Eigen::Quaterniond robRotQ(robRot[0], robRot[1], robRot[2], robRot[3]);
     robotTransform.rotate(robRotQ);
+
+    Eigen::Quaterniond objRotQ(objRot[0], objRot[1], objRot[2], objRot[2]);
+    robotTransform.rotate(objRotQ);
     // robotTransform.rotate(robRot);
     
     std::string robotName="Robot";
@@ -296,6 +300,7 @@ int main(int argc, char **argv)
   std::array<double, 4> robRot;
   std::string out;
 
+  std::vector<double> objRot = {0,0,0,0};
   if (!loadParams(argc, argv, objectFilename, robotFilename, robPos, robRot, out))
   {
     PRINTERROR("Could not read arguments");
@@ -304,7 +309,7 @@ int main(int argc, char **argv)
 
   PRINTMSG("Performing quickGrasp...");
   std::vector<double> dofs = quickGrasp(
-    objectFilename, robotFilename, robPos, robRot, out);
+    objectFilename, objRot, robotFilename, robPos, robRot, out);
   PRINTMSG("The resulting dofs are");
   std::cout << vecToStr(dofs);
   return 0;
