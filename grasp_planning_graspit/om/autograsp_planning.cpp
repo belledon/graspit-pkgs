@@ -76,8 +76,9 @@ std::vector<double> quickGrasp(
     std::string& objectFilename, 
     std::string& robotFilename,
     Eigen::Vector3d& robPos, 
-    const std::vector<double>& robRot,
-    std::string& out)
+    std::array<double, 4>& robRot,
+    std::string& out
+    )
 {
     signal(SIGSEGV, handler);
     signal(SIGABRT, handler);
@@ -121,7 +122,7 @@ std::vector<double> quickGrasp(
       std::stringstream _wFilename;
       _wFilename << out << "/" << "grasp_pose.iv";
       std::string wFilename = _wFilename.str();
-      if (!graspitMgr->saveRobotAsInventor( wFilename, robotName, true, true))
+      if (!graspitMgr->saveRobotAsInventor(wFilename, robotName, true, true))
         {
             PRINTERROR("GraspIt could not save robot pose file " << out);
         }
@@ -160,7 +161,7 @@ bool loadParams(int argc, char ** argv,
   std::string& objectFilename, 
   std::string& robotFilename,
   Eigen::Vector3d robPos,
-  std::vector<double> robRot,
+  std::array<double, 4> robRot,
   std::string& out)
 {
   objectFilename.clear();
@@ -256,7 +257,7 @@ bool loadParams(int argc, char ** argv,
       PRINTERROR("Must specify 4 values for --rob_rot: w, x, y, z (specified "<<vals.size()<<")");
       PRINTMSG(desc);
     }
-    robRot = vals;
+    robRot = {vals[0], vals[1], vals[2], vals[3]};
   }
   if (vm.count("out"))
   {
@@ -292,7 +293,7 @@ int main(int argc, char **argv)
   std::string objectFilename;
   std::string robotFilename;
   Eigen::Vector3d robPos;
-  std::vector<double> robRot;
+  std::array<double, 4> robRot;
   std::string out;
 
   if (!loadParams(argc, argv, objectFilename, robotFilename, robPos, robRot, out))
@@ -315,7 +316,9 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, SHARED_PTR<T>);
 PYBIND11_PLUGIN(autograsp_planning) {
     py::module m("autograsp_planning", "Graspit!-quickGrasp plugin");
 
-    m.def("quickGrasp", &quickGrasp, "Performs Graspit!-autograsp");
+    m.def("quickGrasp", &quickGrasp, "Performs Graspit!-autograsp",
+      py::arg("objectFilename"), py::arg("robotFilename"), 
+      py::arg("robPos"), py::arg("robRot"), py::arg("out"));
     // m.def("main", &main, "Main call to quickGrasp");
     return m.ptr();
 }
