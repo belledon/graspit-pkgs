@@ -102,7 +102,7 @@ std::vector<double> quickGrasp(
     robotTransform.rotate(robRotQ);
 
     Eigen::Quaterniond objRotQ(objRot[0], objRot[1], objRot[2], objRot[3]);
-    robotTransform.rotate(objRotQ);
+    objectTransform.rotate(objRotQ);
     // robotTransform.rotate(robRot);
     
     std::string robotName="Robot";
