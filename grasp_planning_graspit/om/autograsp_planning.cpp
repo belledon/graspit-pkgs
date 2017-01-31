@@ -92,14 +92,17 @@ std::vector<double> quickGrasp(
     
     GraspIt::EigenTransform robotTransform;
     GraspIt::EigenTransform objectTransform;
-    // We want to keep the object at the absolute origin
+    // Object will be at the origin
+    // Robot will first be away from object to open, 
+    // then moved to give position for closing.
+    Eigen::Vector3d robOrig(1000.0, 1000.0, 1000.0);
     robotTransform.setIdentity();
     objectTransform.setIdentity();
-    robotTransform.translate(robPos);
+    robotTransform.translate(robOrig);
     // Have to do this because Eigen::Quaternion isn"t covered by pybind/eigen
       // Eigen::Quaterniond q(2, 0, 1, -3); 
     Eigen::Quaterniond robRotQ(robRot[0], robRot[1], robRot[2], robRot[3]);
-    robotTransform.rotate(robRotQ);
+    
 
     Eigen::Quaterniond objRotQ(objRot[0], objRot[1], objRot[2], objRot[3]);
     objectTransform.rotate(objRotQ);
@@ -119,6 +122,19 @@ std::vector<double> quickGrasp(
         PRINTERROR("Could not load object");
     }
     
+    if (!cg->autoOpen())
+    {
+      PRINTERROR("Could not open hand")
+    }
+    robotTransform.setIdentity();
+    robotTransform.translate(robPos);
+    robotTransform.rotate(robRotQ);
+
+    if (graspitMgr->moveRobot(robotName, robotTransform) != 0)
+    {
+      PRINTERROR("Could not move hand to grasp transform")
+    }
+
     std::vector<double> dofs = cg->autoGrasp();
     if (!out.empty())
     {

@@ -135,6 +135,14 @@ void ContactGetter::sensorCB(void *data, SoSensor *)
 }
 #endif
 
+bool ContactGetter::autoOpen(){
+    PRINTMSG("Getting hand");
+    Hand *h = getGraspItSceneManager()->getCurrentHand();
+    GraspPlanningState gst = GraspPlanningState(h);
+    GraspPlanningState *s;
+    s = &gst;
+    return s->getHand()->quickOpen()
+}
 
 std::vector<double> ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
