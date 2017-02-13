@@ -141,7 +141,7 @@ bool ContactGetter::autoOpen(){
     GraspPlanningState gst = GraspPlanningState(h);
     GraspPlanningState *s;
     s = &gst;
-    return s->getHand()->quickOpen()
+    return s->getHand()->quickOpen();
 }
 
 std::vector<double> ContactGetter::autoGrasp(){
