@@ -149,7 +149,7 @@ std::vector<double> quickGrasp(
     }
     // cg.reset();
     // graspitMgr->destroyCore();
-    
+    graspitMgr->saveRobotBox(out, robotName, true, false)
     return dofs;
 }
 

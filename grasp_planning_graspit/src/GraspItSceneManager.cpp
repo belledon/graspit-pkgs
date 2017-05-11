@@ -34,6 +34,7 @@
 #include <robot.h>
 #include <body.h>
 #include <grasp.h>
+#include <bBox.h>
 #include <graspitCore.h>
 
 #include <Inventor/Qt/SoQt.h>
@@ -410,6 +411,72 @@ bool GraspItSceneManager::saveRobotAsInventor(const std::string& filename, const
     write.getOutput()->closeFile();
 
     PRINTMSG("Saved robot IV to " << filename);
+    return true;
+}
+
+bool GraspItSceneManager::saveRobotBox(const std::string& filename, const std::string& robotName,
+                                   const bool createDir, const bool forceWrite)
+{
+    if (!forceWrite && fileExists(filename))
+    {
+        PRINTERROR("File " << filename << " already exists");
+        return false;
+    }
+    if (!isInitialized())
+    {
+        PRINTERROR("Not initialized");
+        return false;
+    }
+    UNIQUE_RECURSIVE_LOCK(graspitWorldMtx);
+    if (!graspitWorld)
+    {
+        PRINTERROR("Cannot load " << filename << " with no initialized graspitWorld");
+        return false;
+    }
+
+    // Check that no object with same name exists
+    Robot * existingRobot = getRobotNoCheck(robotName);
+    if (!existingRobot)
+    {
+        PRINTERROR("Robot with name " << robotName << " does not exist in world.");
+        return false;
+    }
+
+    try
+    {
+        if (createDir && !makeDirectoryIfNeeded(getFileDirectory(filename)))
+        {
+            PRINTERROR("Could not create directory for file " << filename);
+            return false;
+        }
+    }
+    catch (int e)
+    {
+        PRINTERROR("An exception ocurred when trying to create the directory. Exception number " << e);
+        return false;
+    }
+
+    SoOutput out;
+    if (!out.openFile(filename.c_str())) return false;
+    out.setBinary(false);
+    // SoWriteAction write(&out);
+    Body * palm = existingRobot->getBase();
+    std::vector<BoundingBox> palm_bvs;
+    graspitWorld->getCollisionInterface()->getBoundingVolumes(palm,0, &palm_bvs);
+    std::stringstream ss;
+    for(size_t i = 0; i < palm_bvs.size(); ++i)
+    {
+      if(i != 0)
+        ss << ",";
+      ss << palm_bvs[i];
+    }
+    std::string s = ss.str();
+    std::cout << s
+
+    // write.apply(palm_bvs);
+    // write.getOutput()->closeFile();
+
+    // PRINTMSG("Saved robot IV to " << filename);
     return true;
 }
 
