@@ -72,7 +72,7 @@ void handler(int sig)
     exit(1);
 }
 
-std::vector<double> quickGrasp(
+std::vector<float> quickGrasp(
     std::string& objectFilename, 
     std::array<double, 4>& objRot,
     std::string& robotFilename,
@@ -135,7 +135,7 @@ std::vector<double> quickGrasp(
       PRINTERROR("Could not move hand to grasp transform")
     }
 
-    std::vector<double> dofs = cg->autoGrasp();
+    std::vector<float> bbox = cg->autoGrasp();
     if (!out.empty())
     {
       PRINTMSG("Saving grasp to : " << out);
@@ -149,8 +149,8 @@ std::vector<double> quickGrasp(
     }
     // cg.reset();
     // graspitMgr->destroyCore();
-    graspitMgr->saveRobotBox(out, robotName, true, false)
-    return dofs;
+
+    return bbox;
 }
 
 boost::program_options::options_description getOptions()
@@ -324,10 +324,10 @@ int main(int argc, char **argv)
   }
 
   PRINTMSG("Performing quickGrasp...");
-  std::vector<double> dofs = quickGrasp(
+  std::vector<float> bbox = quickGrasp(
     objectFilename, objRot, robotFilename, robPos, robRot, out);
-  PRINTMSG("The resulting dofs are");
-  std::cout << vecToStr(dofs);
+  PRINTMSG("The resulting bbox is");
+  std::cout << vecToStr(bbox);
   return 0;
 
 }

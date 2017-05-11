@@ -39,6 +39,7 @@ class EGPlanner;
 class World;
 class GraspitCore;
 class SoSensor;
+class SoSeparator;
 class transf;
 class Robot;
 class Body;
@@ -305,6 +306,11 @@ public:
      */
     bool saveRobotAsInventor(const std::string& filename, const std::string& robotName,
                                    const bool createDir=false, const bool forceWrite=false);
+
+    /**
+     * Prints robot palm bounding box.
+     */
+    std::vector<float> getRobotBox(Robot * robot, SoSeparator * root);
 
     /**
      * Saves the object as inventor file, if it was loaded in the world before.

@@ -144,7 +144,7 @@ bool ContactGetter::autoOpen(){
     return s->getHand()->quickOpen();
 }
 
-std::vector<double> ContactGetter::autoGrasp(){
+std::vector<float> ContactGetter::autoGrasp(){
     PRINTMSG("Getting hand");
     Hand *h = getGraspItSceneManager()->getCurrentHand();
     PRINTMSG("Performing autograsp");
@@ -155,33 +155,40 @@ std::vector<double> ContactGetter::autoGrasp(){
     {
         PRINTWARN("Could not correctly open hand with auto-grasp, the pre-grasp state may not be ideal.");
     }
-    PRINTMSG("Saving result");
+   
     s->saveCurrentHandState();
     
-    
-    const PostureState* handPosture = s->readPosture();
-    if (!handPosture)
-    {
-        PRINTERROR("Posture is NULL!");
-    }
+    // if (!getGraspItSceneManager()->saveRobotBox("", "Robot", true, false))
+    // Robot * nh = s->getHand();
+    std::vector<float> bbox = getGraspItSceneManager()->getRobotBox(s->getHand(), s->getIVRoot());
+    // if (!getGraspItSceneManager()->saveRobotBox(s->getHand(), s->getIVRoot()))
+    // {
+    //   PRINTMSG("Did something with bounding box");
+    // }
 
-    // std::string robotName="Robot1";
-    // Robot *r = getGraspItSceneManager()->getRobot(robotName);
-    // h = getGraspItSceneManager()->getCurrentHand();
-    PRINTMSG("Getting hand dofs");
-    const int numDOF = s->getHand()->getNumDOF();
-    double * _dofs = new double[numDOF];
-    handPosture->getHandDOF(_dofs);
-    std::vector<double> dofs;
-    for (int k = 0; k < numDOF; ++k)
-    {
-        dofs.push_back(_dofs[k]);
-    }
-    // r->getDOFVals(dofs);
-    PRINTMSG("Obtained hand dofs");
+    // const PostureState* handPosture = s->readPosture();
+    // if (!handPosture)
+    // {
+    //     PRINTERROR("Posture is NULL!");
+    // }
+
+    // // std::string robotName="Robot1";
+    // // Robot *r = getGraspItSceneManager()->getRobot(robotName);
+    // // h = getGraspItSceneManager()->getCurrentHand();
+    // PRINTMSG("Getting hand dofs");
+    // const int numDOF = s->getHand()->getNumDOF();
+    // double * _dofs = new double[numDOF];
+    // handPosture->getHandDOF(_dofs);
+    // std::vector<double> dofs;
+    // for (int k = 0; k < numDOF; ++k)
+    // {
+    //     dofs.push_back(_dofs[k]);
+    // }
+    // // r->getDOFVals(dofs);
+    PRINTMSG("Obtained hand bounding box");
     PRINTMSG("Cleaning up");
     // delete s;
-    return dofs;
+    return bbox;
 }
 
 std::list< Contact* > ContactGetter::getGraspContacts(const std::string& robName, const std::string& objName)

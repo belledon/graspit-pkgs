@@ -51,7 +51,7 @@ namespace GraspIt
 		std::vector<double> getContactPos(Contact * c);
 		std::vector<double> getContactNorm(Contact * c);
 		bool autoOpen();	
-		std::vector<double> autoGrasp();
+		std::vector<float> autoGrasp();
 
 
 	protected:
